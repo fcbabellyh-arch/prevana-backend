@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prevana — Mon abonnement</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --or: #C9A84C; --or-clair: #E8C97A; --blanc: #F0EDE8;
+  --gris: #8A8AAA; --noir: #0A0A0F; --anth: #141420;
+  --carte: #1A1A2E; --bord: #2A2A45; --vert: #4CAF7D; --rouge: #E05A5A;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--noir);color:var(--blanc);font-family:'DM Sans',sans-serif;min-height:100vh;}
+
+/* HEADER */
+header{background:var(--anth);border-bottom:1px solid var(--bord);padding:18px 40px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:'Playfair Display',serif;font-weight:900;font-size:1.4rem;}
+.logo span:first-child{color:var(--or);}
+.back-btn{background:transparent;border:1px solid var(--bord);border-radius:8px;color:var(--gris);padding:8px 16px;font-family:'DM Sans',sans-serif;font-size:0.85rem;cursor:pointer;transition:all 0.2s;}
+.back-btn:hover{border-color:var(--or);color:var(--or);}
+
+/* HERO */
+.hero{text-align:center;padding:60px 40px 40px;}
+.hero h1{font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:900;margin-bottom:12px;}
+.hero h1 em{color:var(--or);font-style:italic;}
+.hero p{color:var(--gris);font-size:1rem;max-width:480px;margin:0 auto;}
+
+/* PLANS */
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:1000px;margin:40px auto;padding:0 40px;}
+
+.plan{background:var(--carte);border:1px solid var(--bord);border-radius:20px;padding:32px 28px;position:relative;transition:transform 0.2s;}
+.plan:hover{transform:translateY(-4px);}
+.plan.featured{border-color:var(--or);background:linear-gradient(160deg,rgba(201,168,76,0.08) 0%,var(--carte) 60%);transform:scale(1.04);}
+.plan.featured:hover{transform:scale(1.04) translateY(-4px);}
+
+.plan-badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--or),var(--or-clair));color:var(--noir);font-size:0.65rem;font-weight:700;padding:4px 14px;border-radius:20px;white-space:nowrap;}
+
+.plan-name{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;margin-bottom:6px;}
+.plan-desc{font-size:0.8rem;color:var(--gris);margin-bottom:24px;}
+.plan-price{font-family:'DM Mono',monospace;font-size:2.8rem;font-weight:500;color:var(--or);line-height:1;}
+.plan-period{font-size:0.78rem;color:var(--gris);margin-top:4px;margin-bottom:6px;}
+.plan-daily{font-size:0.74rem;color:var(--vert);font-weight:500;margin-bottom:24px;}
+.plan-sep{height:1px;background:var(--bord);margin:0 0 20px;}
+
+.plan-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
+.plan-features li{font-size:0.82rem;color:var(--gris);display:flex;align-items:flex-start;gap:8px;line-height:1.4;}
+.plan-features li .ic{color:var(--vert);flex-shrink:0;}
+.plan-features li.off{opacity:0.35;}
+.plan-features li.off .ic{color:var(--gris);}
+
+.plan-cta{width:100%;padding:13px;border-radius:50px;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.plan.featured .plan-cta{background:linear-gradient(135deg,var(--or),var(--or-clair));border:none;color:var(--noir);box-shadow:0 6px 24px rgba(201,168,76,0.3);}
+.plan.featured .plan-cta:hover{transform:translateY(-1px);box-shadow:0 10px 32px rgba(201,168,76,0.4);}
+.plan:not(.featured) .plan-cta{background:transparent;border:1px solid var(--bord);color:var(--gris);}
+.plan:not(.featured) .plan-cta:hover{border-color:var(--or);color:var(--or);}
+
+/* ADDON */
+.addon-note{text-align:center;font-size:0.8rem;color:var(--gris);margin-top:8px;}
+.addon-note strong{color:var(--blanc);}
+
+/* ABONNEMENT ACTUEL */
+.current-sub{max-width:1000px;margin:0 auto 40px;padding:0 40px;}
+.current-card{background:rgba(76,175,125,0.06);border:1px solid rgba(76,175,125,0.2);border-radius:16px;padding:24px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+.current-info h3{font-size:1rem;font-weight:600;color:var(--blanc);margin-bottom:4px;}
+.current-info p{font-size:0.82rem;color:var(--gris);}
+.current-badge{background:rgba(76,175,125,0.15);border:1px solid rgba(76,175,125,0.3);border-radius:20px;padding:4px 14px;font-size:0.75rem;font-weight:600;color:var(--vert);}
+.manage-btn{background:transparent;border:1px solid var(--bord);border-radius:8px;color:var(--gris);padding:10px 20px;font-family:'DM Sans',sans-serif;font-size:0.85rem;cursor:pointer;transition:all 0.2s;}
+.manage-btn:hover{border-color:var(--or);color:var(--or);}
+
+/* ONE-SHOTS */
+.oneshots{max-width:1000px;margin:0 auto 60px;padding:0 40px;}
+.oneshots h2{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;margin-bottom:8px;}
+.oneshots p{color:var(--gris);font-size:0.88rem;margin-bottom:28px;}
+.os-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+.os-card{background:var(--carte);border:1px solid var(--bord);border-radius:14px;padding:24px;display:flex;gap:16px;align-items:flex-start;transition:border-color 0.2s;}
+.os-card:hover{border-color:rgba(201,168,76,0.3);}
+.os-icon{font-size:1.8rem;flex-shrink:0;}
+.os-price{font-family:'DM Mono',monospace;font-size:1.3rem;font-weight:500;color:var(--or);margin-bottom:4px;}
+.os-title{font-size:0.95rem;font-weight:600;color:var(--blanc);margin-bottom:6px;}
+.os-desc{font-size:0.8rem;color:var(--gris);line-height:1.5;margin-bottom:14px;}
+.os-btn{background:transparent;border:1px solid var(--bord);border-radius:8px;color:var(--gris);padding:8px 16px;font-family:'DM Sans',sans-serif;font-size:0.8rem;cursor:pointer;transition:all 0.2s;}
+.os-btn:hover{border-color:var(--or);color:var(--or);}
+
+/* GARANTIE */
+.garantie{max-width:1000px;margin:0 auto 60px;padding:0 40px;}
+.garantie-card{background:rgba(201,168,76,0.04);border:1px solid rgba(201,168,76,0.15);border-radius:14px;padding:24px 28px;display:flex;gap:16px;align-items:center;}
+.garantie-icon{font-size:2rem;flex-shrink:0;}
+.garantie-title{font-size:0.95rem;font-weight:600;color:var(--blanc);margin-bottom:4px;}
+.garantie-body{font-size:0.82rem;color:var(--gris);line-height:1.6;}
+.garantie-body strong{color:var(--vert);}
+
+@media(max-width:768px){
+  .plans{grid-template-columns:1fr;}
+  .plan.featured{transform:scale(1);}
+  .os-grid{grid-template-columns:1fr;}
+  .current-card{flex-direction:column;}
+  header{padding:14px 20px;}
+  .hero{padding:40px 20px 24px;}
+  .plans,.current-sub,.oneshots,.garantie{padding:0 20px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span>prev</span><span>ana</span></div>
+  <button class="back-btn" onclick="goBack()">← Tableau de bord</button>
+</header>
+
+<!-- ABONNEMENT ACTUEL (affiché si abonné) -->
+<div class="current-sub" id="currentSubSection" style="display:none;margin-top:32px;">
+  <div class="current-card">
+    <div class="current-info">
+      <h3 id="currentPlanName">Plan Pro</h3>
+      <p id="currentPlanDesc">4 prévisionnels actifs · Renouvellement le <span id="renewDate">—</span></p>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <span class="current-badge">✓ Actif</span>
+      <button class="manage-btn" onclick="manageSubscription()">Gérer mon abonnement →</button>
+    </div>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Choisir <em>mon plan</em></h1>
+  <p>Sans engagement · Résiliation en 1 clic · Accès immédiat</p>
+</div>
+
+<!-- PLANS -->
+<div class="plans">
+
+  <!-- STARTER -->
+  <div class="plan">
+    <div class="plan-name">Starter</div>
+    <div class="plan-desc">Pour démarrer et valider ton projet.</div>
+    <div class="plan-price">14,90 €</div>
+    <div class="plan-period">par mois · sans engagement</div>
+    <div class="plan-daily">Soit 0,49 € / jour</div>
+    <div class="plan-sep"></div>
+    <ul class="plan-features">
+      <li><span class="ic">✓</span> 2 prévisionnels actifs</li>
+      <li><span class="ic">✓</span> Prévisionnel classique</li>
+      <li><span class="ic">✓</span> Modifications illimitées</li>
+      <li><span class="ic">✓</span> Export PDF professionnel</li>
+      <li class="off"><span class="ic">—</span> Prévisionnel immobilier</li>
+      <li class="off"><span class="ic">—</span> Suivi Prévu vs Réel</li>
+    </ul>
+    <button class="plan-cta" onclick="subscribe('starter')">Choisir Starter</button>
+    <div class="addon-note">Add-on prévi. supp. : <strong>6,99 €/mois</strong></div>
+  </div>
+
+  <!-- PRO -->
+  <div class="plan featured">
+    <div class="plan-badge">✦ Le plus choisi</div>
+    <div class="plan-name">Pro</div>
+    <div class="plan-desc">Pour les entrepreneurs multi-projets.</div>
+    <div class="plan-price">29,90 €</div>
+    <div class="plan-period">par mois · sans engagement</div>
+    <div class="plan-daily">Soit 0,99 € / jour</div>
+    <div class="plan-sep"></div>
+    <ul class="plan-features">
+      <li><span class="ic">✓</span> 4 prévisionnels actifs</li>
+      <li><span class="ic">✓</span> Tous les types de prévisionnels</li>
+      <li><span class="ic">✓</span> Modifications illimitées</li>
+      <li><span class="ic">✓</span> Export PDF professionnel</li>
+      <li><span class="ic">✓</span> Prévisionnel immobilier</li>
+      <li><span class="ic">✓</span> Suivi Prévu vs Réel</li>
+    </ul>
+    <button class="plan-cta" onclick="subscribe('pro')">Commencer maintenant →</button>
+    <div class="addon-note">Add-on prévi. supp. : <strong>6,99 €/mois</strong></div>
+  </div>
+
+  <!-- PREMIUM -->
+  <div class="plan">
+    <div class="plan-name">Premium</div>
+    <div class="plan-desc">Pour les investisseurs et multi-projets.</div>
+    <div class="plan-price">59,90 €</div>
+    <div class="plan-period">par mois · sans engagement</div>
+    <div class="plan-daily">Soit 1,99 € / jour</div>
+    <div class="plan-sep"></div>
+    <ul class="plan-features">
+      <li><span class="ic">✓</span> 10 prévisionnels actifs</li>
+      <li><span class="ic">✓</span> Tous les types de prévisionnels</li>
+      <li><span class="ic">✓</span> Modifications illimitées</li>
+      <li><span class="ic">✓</span> Export PDF professionnel</li>
+      <li><span class="ic">✓</span> Prévisionnel immobilier</li>
+      <li><span class="ic">✓</span> Suivi Prévu vs Réel</li>
+    </ul>
+    <button class="plan-cta" onclick="subscribe('premium')">Choisir Premium</button>
+    <div class="addon-note">Add-on prévi. supp. : <strong>4,99 €/mois</strong></div>
+  </div>
+</div>
+
+<!-- GARANTIE -->
+<div class="garantie">
+  <div class="garantie-card">
+    <div class="garantie-icon">🛡️</div>
+    <div>
+      <div class="garantie-title">Satisfait ou remboursé — 7 jours</div>
+      <div class="garantie-body">Tu essaies Prevana. Si dans les 7 premiers jours tu n'es pas convaincu, <strong>on te rembourse sans poser de question.</strong></div>
+    </div>
+  </div>
+</div>
+
+<!-- ONE-SHOTS -->
+<div class="oneshots">
+  <h2>Besoin d'un <em style="color:var(--or)">expert</em> ?</h2>
+  <p>Des prestations ponctuelles où un expert analyse ton prévisionnel directement.</p>
+  <div class="os-grid">
+    <div class="os-card">
+      <div class="os-icon">💬</div>
+      <div>
+        <div class="os-price">199 €</div>
+        <div class="os-title">Session Conseil</div>
+        <div class="os-desc">Appel 1:1 avec l'expert — analyse, ajustements et conseils personnalisés sur ton projet financier.</div>
+        <button class="os-btn" onclick="orderOneShot('conseil')">Réserver →</button>
+      </div>
+    </div>
+    <div class="os-card">
+      <div class="os-icon">🔍</div>
+      <div>
+        <div class="os-price">299 €</div>
+        <div class="os-title">Audit Expert</div>
+        <div class="os-desc">Analyse complète de ton prévisionnel : cohérence des chiffres, hypothèses et identification des risques.</div>
+        <button class="os-btn" onclick="orderOneShot('audit')">Commander →</button>
+      </div>
+    </div>
+    <div class="os-card">
+      <div class="os-icon">📊</div>
+      <div>
+        <div class="os-price">349 €</div>
+        <div class="os-title">Test de Viabilité</div>
+        <div class="os-desc">Scénarios optimiste / réaliste / pessimiste + synthèse écrite pour valider la faisabilité de ton projet.</div>
+        <button class="os-btn" onclick="orderOneShot('viabilite')">Commander →</button>
+      </div>
+    </div>
+    <div class="os-card">
+      <div class="os-icon">🏦</div>
+      <div>
+        <div class="os-price">499 €</div>
+        <div class="os-title">Pack Financement</div>
+        <div class="os-desc">Audit complet + optimisation du dossier bancaire pour maximiser tes chances d'obtenir un financement.</div>
+        <button class="os-btn" onclick="orderOneShot('financement')">Commander →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Reçoit les données de Bubble (plan actuel, price IDs Stripe)
+let bubbleData = {
+  currentPlan: null,
+  priceIds: { starter: '', pro: '', premium: '' },
+  stripePortalUrl: '',
+  renewDate: ''
+};
+
+window.addEventListener('message', function(e) {
+  if (!e.data) return;
+  if (e.data.type === 'PREVANA_INIT_ABONNEMENT') {
+    bubbleData = { ...bubbleData, ...e.data };
+    initPage();
+  }
+});
+
+function initPage() {
+  if (bubbleData.currentPlan) {
+    document.getElementById('currentSubSection').style.display = 'block';
+    const names = { starter: 'Plan Starter', pro: 'Plan Pro', premium: 'Plan Premium' };
+    document.getElementById('currentPlanName').textContent = names[bubbleData.currentPlan] || 'Abonnement actif';
+    document.getElementById('renewDate').textContent = bubbleData.renewDate || '—';
+  }
+}
+
+function subscribe(plan) {
+  // Envoie l'action à Bubble
+  window.parent.postMessage({
+    type: 'PREVANA_SUBSCRIBE',
+    plan: plan,
+    price_id: bubbleData.priceIds[plan] || ''
+  }, '*');
+}
+
+function manageSubscription() {
+  window.parent.postMessage({ type: 'PREVANA_MANAGE_SUB' }, '*');
+}
+
+function orderOneShot(type) {
+  window.parent.postMessage({ type: 'PREVANA_ONESHOT', product: type }, '*');
+}
+
+function goBack() {
+  window.parent.postMessage({ type: 'PREVANA_NAVIGATE', page: 'dashboard' }, '*');
+}
+</script>
+</body>
+</html>

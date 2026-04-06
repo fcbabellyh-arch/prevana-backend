@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prevana — Mon prévisionnel financier</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --or: #C9A84C;
+    --or-clair: #E8C97A;
+    --blanc: #F0EDE8;
+    --gris: #8A8AAA;
+    --noir: #0A0A0F;
+    --anthracite: #141420;
+    --carte: #1A1A2E;
+    --bordure: #2A2A45;
+    --vert: #4CAF7D;
+    --rouge: #E05A5A;
+    --bleu: #5A8AE0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--noir);
+    color: var(--blanc);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--anthracite);
+    border-bottom: 1px solid var(--bordure);
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 1.6rem;
+    letter-spacing: -0.5px;
+  }
+  .logo span:first-child { color: var(--or); }
+  .logo span:last-child { color: var(--blanc); }
+
+  .tagline-header {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    color: var(--gris);
+    font-style: italic;
+  }
+
+  /* PROGRESS BAR */
+  .progress-container {
+    padding: 24px 40px 0;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .step-label {
+    font-size: 0.8rem;
+    color: var(--gris);
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .step-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--or);
+  }
+
+  .progress-bar-bg {
+    height: 4px;
+    background: var(--bordure);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--or), var(--or-clair));
+    border-radius: 2px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* MAIN CONTENT */
+  main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 40px 100px;
+  }
+
+  /* STEP */
+  .step {
+    display: none;
+    animation: fadeIn 0.4s ease;
+  }
+  .step.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .step-header {
+    margin-bottom: 36px;
+  }
+
+  .step-number {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--or);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .step-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--blanc);
+    margin-bottom: 10px;
+    line-height: 1.2;
+  }
+
+  .step-subtitle {
+    font-size: 0.95rem;
+    color: var(--gris);
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--carte);
+    border: 1px solid var(--bordure);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--or);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 20px;
+  }
+
+  /* FIELDS */
+  .field {
+    margin-bottom: 20px;
+  }
+
+  .field:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--blanc);
+    margin-bottom: 6px;
+  }
+
+  .field-hint {
+    font-size: 0.78rem;
+    color: var(--gris);
+    margin-bottom: 8px;
+    font-weight: 300;
+    line-height: 1.5;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    background: var(--anthracite);
+    border: 1px solid var(--bordure);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--blanc);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 400;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--or);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+  }
+
+  input::placeholder { color: var(--gris); opacity: 0.6; }
+
+  select option {
+    background: var(--anthracite);
+    color: var(--blanc);
+  }
+
+  .input-with-suffix {
+    position: relative;
+  }
+
+  .input-with-suffix input {
+    padding-right: 50px;
+  }
+
+  .input-suffix {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--gris);
+    pointer-events: none;
+  }
+
+  /* GRID */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 600px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    main { padding: 24px 20px 100px; }
+    .progress-container { padding: 20px 20px 0; }
+    header { padding: 16px 20px; }
+    .step-title { font-size: 1.5rem; }
+  }
+
+  /* DYNAMIC ROWS */
+  .dynamic-list { margin-top: 4px; }
+
+  .dynamic-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .dynamic-row-3 {
+    grid-template-columns: 1fr 120px 120px auto;
+  }
+
+  .btn-remove {
+    background: transparent;
+    border: 1px solid var(--rouge);
+    border-radius: 6px;
+    color: var(--rouge);
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .btn-remove:hover { background: rgba(224,90,90,0.12); }
+
+  .btn-add {
+    background: transparent;
+    border: 1px dashed var(--or);
+    border-radius: 8px;
+    color: var(--or);
+    padding: 10px 18px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .btn-add:hover { background: rgba(201,168,76,0.08); }
+
+  /* RADIO / OPTIONS */
+  .options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  .option-card {
+    background: var(--anthracite);
+    border: 1px solid var(--bordure);
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    text-align: center;
+  }
+
+  .option-card input[type="radio"] { display: none; }
+
+  .option-card:hover {
+    border-color: var(--or);
+    background: rgba(201,168,76,0.06);
+  }
+
+  .option-card.selected {
+    border-color: var(--or);
+    background: rgba(201,168,76,0.1);
+  }
+
+  .option-card .option-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--blanc);
+  }
+
+  .option-card .option-sub {
+    font-size: 0.75rem;
+    color: var(--gris);
+    margin-top: 2px;
+  }
+
+  /* TOGGLE */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--bordure);
+  }
+  .toggle-row:last-child { border-bottom: none; }
+
+  .toggle-info { flex: 1; }
+  .toggle-info label { font-size: 0.9rem; margin-bottom: 2px; cursor: pointer; }
+  .toggle-info .field-hint { margin-bottom: 0; }
+
+  .toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+    margin-left: 16px;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--bordure);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    left: 3px; top: 3px;
+    background: var(--gris);
+    border-radius: 50%;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .toggle input:checked + .toggle-slider { background: rgba(201,168,76,0.2); }
+  .toggle input:checked + .toggle-slider::before {
+    transform: translateX(20px);
+    background: var(--or);
+  }
+
+  /* COLLAPSIBLE */
+  .collapsible-section {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.4s ease;
+  }
+  .collapsible-section.open { max-height: 2000px; }
+
+  /* INFO BOX */
+  .info-box {
+    background: rgba(90,138,224,0.08);
+    border: 1px solid rgba(90,138,224,0.25);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .info-box-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+  .info-box p { font-size: 0.82rem; color: var(--gris); line-height: 1.6; }
+  .info-box strong { color: var(--blanc); }
+
+  /* NAVIGATION */
+  .nav-buttons {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--anthracite);
+    border-top: 1px solid var(--bordure);
+    padding: 16px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+  }
+
+  .btn-prev {
+    background: transparent;
+    border: 1px solid var(--bordure);
+    border-radius: 50px;
+    color: var(--gris);
+    padding: 12px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-prev:hover { border-color: var(--gris); color: var(--blanc); }
+  .btn-prev:disabled { opacity: 0.3; cursor: default; }
+
+  .btn-next {
+    background: linear-gradient(135deg, var(--or), var(--or-clair));
+    border: none;
+    border-radius: 50px;
+    color: var(--noir);
+    padding: 12px 32px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-next:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  /* RECAP */
+  .recap-section {
+    margin-bottom: 20px;
+  }
+
+  .recap-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--or);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 12px;
+  }
+
+  .recap-grid {
+    display: grid;
+    gap: 8px;
+  }
+
+  .recap-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    background: var(--anthracite);
+    border-radius: 8px;
+  }
+
+  .recap-key {
+    font-size: 0.85rem;
+    color: var(--gris);
+  }
+
+  .recap-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--blanc);
+    font-weight: 500;
+  }
+
+  /* BADGE */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(201,168,76,0.1);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 12px;
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    color: var(--or);
+    font-weight: 500;
+    margin-bottom: 20px;
+  }
+
+  /* COLUMN HEADERS FOR DYNAMIC ROWS */
+  .col-headers {
+    display: grid;
+    grid-template-columns: 1fr 120px 120px 36px;
+    gap: 10px;
+    margin-bottom: 6px;
+    padding: 0 2px;
+  }
+  .col-header {
+    font-size: 0.72rem;
+    color: var(--gris);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .col-headers-charges {
+    grid-template-columns: 1fr 100px 36px;
+  }
+
+  .dynamic-row-charges {
+    display: grid;
+    grid-template-columns: 1fr 100px 36px;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .dynamic-row-charges .charge-nom {
+    height: auto;
+    min-height: 42px;
+    line-height: 1.4;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  /* SEPARATOR */
+  .separator {
+    height: 1px;
+    background: var(--bordure);
+    margin: 20px 0;
+  }
+
+  /* SMALL LABEL */
+  .col-label {
+    font-size: 0.72rem;
+    color: var(--gris);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  /* SUCCESS STEP */
+  .success-icon {
+    width: 72px;
+    height: 72px;
+    background: rgba(76,175,125,0.12);
+    border: 2px solid var(--vert);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin: 0 auto 24px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span>prev</span><span>ana</span></div>
+  <div class="tagline-header">Anticipez, réussissez</div>
+</header>
+
+<div class="progress-container">
+  <div class="progress-info">
+    <span class="step-label" id="stepLabel">Informations générales</span>
+    <span class="step-count" id="stepCount">1 / 7</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progressFill" style="width: 14.28%"></div>
+  </div>
+</div>
+
+<main>
+
+  <!-- ÉTAPE 1 : Informations générales -->
+  <div class="step active" id="step-1">
+    <div class="step-header">
+      <div class="step-number">Étape 1 sur 7</div>
+      <h1 class="step-title">Ton projet en quelques mots</h1>
+      <p class="step-subtitle">Pas besoin d'être expert — réponds simplement à ces quelques questions sur ton activité.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Ton projet</div>
+
+      <div class="field">
+        <label for="nomProjet">Comment tu appelles ton projet ?</label>
+        <div class="field-hint">Le nom de ton entreprise ou de ton activité.</div>
+        <input type="text" id="nomProjet" placeholder="Ex : Mon Shop, Studio Créa, Coach Pro…">
+      </div>
+
+      <div class="field">
+        <label>Quelle est ton activité principale ?</label>
+        <div class="field-hint">Choisis ce qui correspond le mieux à ce que tu fais (ou ce que tu veux faire).</div>
+        <select id="secteur">
+          <option value="" disabled selected>Choisir une activité…</option>
+          <optgroup label="Commerce">
+            <option value="ecommerce">E-commerce / vente en ligne</option>
+            <option value="dropshipping">Dropshipping</option>
+            <option value="commerce-physique">Commerce physique (boutique)</option>
+          </optgroup>
+          <optgroup label="Services & Conseil">
+            <option value="coaching">Coaching / formation en ligne</option>
+            <option value="freelance">Freelance / prestation de services</option>
+            <option value="conseil">Conseil / consulting</option>
+            <option value="agence">Agence (marketing, web…)</option>
+          </optgroup>
+          <optgroup label="Contenu & Créativité">
+            <option value="createur">Créateur de contenu</option>
+            <option value="infoproduit">Infoproduit / formation digitale</option>
+          </optgroup>
+          <optgroup label="Artisanat & Production">
+            <option value="artisanat">Artisanat / fabrication</option>
+            <option value="restauration">Restauration / food</option>
+          </optgroup>
+          <optgroup label="Autre">
+            <option value="autre">Autre activité</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Sous quelle forme vas-tu exercer ?</label>
+        <div class="field-hint">Si tu ne sais pas encore, choisis "Je ne sais pas encore" — tu pourras changer plus tard.</div>
+        <div class="options-grid" id="formeJuridiqueOptions">
+          <label class="option-card">
+            <input type="radio" name="formeJuridique" value="AE">
+            <div class="option-label">Auto-entrepreneur</div>
+            <div class="option-sub">Micro-entreprise</div>
+          </label>
+          <label class="option-card">
+            <input type="radio" name="formeJuridique" value="SASU">
+            <div class="option-label">SASU</div>
+            <div class="option-sub">Société, 1 associé</div>
+          </label>
+          <label class="option-card">
+            <input type="radio" name="formeJuridique" value="SAS">
+            <div class="option-label">SAS</div>
+            <div class="option-sub">Société, plusieurs</div>
+          </label>
+          <label class="option-card">
+            <input type="radio" name="formeJuridique" value="SARL">
+            <div class="option-label">SARL / EURL</div>
+            <div class="option-sub">Société classique</div>
+          </label>
+          <label class="option-card">
+            <input type="radio" name="formeJuridique" value="EI">
+            <div class="option-label">Entreprise individuelle</div>
+            <div class="option-sub">EI / EIRL</div>
+          </label>
+          <label class="option-card">
+            <input type="radio" name="formeJuridique" value="NSP">
+            <div class="option-label">Je ne sais pas encore</div>
+            <div class="option-sub"></div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">La période</div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label for="dateDemarrage">Quand démarre ton activité ?</label>
+          <div class="field-hint">La date à laquelle tu prévois de lancer.</div>
+          <input type="month" id="dateDemarrage">
+        </div>
+        <div class="field">
+          <label>Sur combien d'années tu veux faire le plan ?</label>
+          <div class="field-hint">La plupart des banques demandent 3 ans.</div>
+          <div class="options-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+            <label class="option-card">
+              <input type="radio" name="duree" value="1">
+              <div class="option-label">1 an</div>
+            </label>
+            <label class="option-card">
+              <input type="radio" name="duree" value="2">
+              <div class="option-label">2 ans</div>
+            </label>
+            <label class="option-card selected">
+              <input type="radio" name="duree" value="3" checked>
+              <div class="option-label">3 ans</div>
+              <div class="option-sub">Recommandé</div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 2 : Chiffre d'affaires -->
+  <div class="step" id="step-2">
+    <div class="step-header">
+      <div class="step-number">Étape 2 sur 7</div>
+      <h1 class="step-title">Ce que tu vas vendre</h1>
+      <p class="step-subtitle">Liste tes produits ou services, avec leur prix et combien tu penses en vendre chaque mois. Pas besoin d'être précis — c'est une estimation.</p>
+    </div>
+
+    <div class="info-box">
+      <div class="info-box-icon">💡</div>
+      <p><strong>Astuce :</strong> Tous les montants sont <strong>hors taxes (HT)</strong>. Si tu connais ton prix TTC, enlève 20% pour trouver le HT. Ex : 120€ TTC = 100€ HT.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Mes produits / services</div>
+
+      <div class="col-headers">
+        <div class="col-header">Nom du produit ou service</div>
+        <div class="col-header">Prix HT (€)</div>
+        <div class="col-header">Qté / mois</div>
+        <div></div>
+      </div>
+
+      <div class="dynamic-list" id="caList">
+        <div class="dynamic-row dynamic-row-3">
+          <input type="text" placeholder="Ex : Formation en ligne, T-shirt…" class="ca-nom">
+          <div class="input-with-suffix">
+            <input type="number" placeholder="0" min="0" class="ca-prix">
+            <span class="input-suffix">€</span>
+          </div>
+          <div class="input-with-suffix">
+            <input type="number" placeholder="0" min="0" class="ca-qte">
+            <span class="input-suffix">×</span>
+          </div>
+          <button class="btn-remove" onclick="removeRow(this, 'caList')" title="Supprimer">×</button>
+        </div>
+      </div>
+
+      <button class="btn-add" onclick="addCARow()">
+        <span>+</span> Ajouter un produit / service
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Évolution prévue</div>
+      <div class="field">
+        <label>Est-ce que tu prévois une croissance d'une année sur l'autre ?</label>
+        <div class="field-hint">Par exemple, si tu penses vendre 20% de plus chaque année, indique 20.</div>
+        <div class="grid-2">
+          <div>
+            <div class="col-label">Croissance An 2 vs An 1</div>
+            <div class="input-with-suffix">
+              <input type="number" id="croissanceAn2" placeholder="0" min="0" max="200">
+              <span class="input-suffix">%</span>
+            </div>
+          </div>
+          <div>
+            <div class="col-label">Croissance An 3 vs An 2</div>
+            <div class="input-with-suffix">
+              <input type="number" id="croissanceAn3" placeholder="0" min="0" max="200">
+              <span class="input-suffix">%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 3 : Charges -->
+  <div class="step" id="step-3">
+    <div class="step-header">
+      <div class="step-number">Étape 3 sur 7</div>
+      <h1 class="step-title">Tes dépenses régulières</h1>
+      <p class="step-subtitle">Ce sont les dépenses liées à ton activité — loyer, abonnements, publicité, matières premières… Indique ce que tu penses dépenser chaque mois.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Achats de produits ou de matières</div>
+      <div class="field-hint" style="margin-bottom:16px;">Si tu achètes des produits pour les revendre, ou des matières pour les transformer, indique-les ici. Si ce n'est pas ton cas, laisse vide.</div>
+
+      <div class="col-headers col-headers-charges">
+        <div class="col-header">Description</div>
+        <div class="col-header">Montant mensuel HT</div>
+        <div></div>
+      </div>
+
+      <div class="dynamic-list" id="achatsList">
+        <div class="dynamic-row-charges">
+          <input type="text" placeholder="Ex : Achat de stock, emballages…" class="charge-nom">
+          <div class="input-with-suffix">
+            <input type="number" placeholder="0" min="0" class="charge-montant">
+            <span class="input-suffix">€</span>
+          </div>
+          <button class="btn-remove" onclick="removeRow(this, 'achatsList')" title="Supprimer">×</button>
+        </div>
+      </div>
+      <button class="btn-add" onclick="addChargeRow('achatsList', 'Achat de stock, matières…')">+ Ajouter</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Frais de fonctionnement</div>
+      <div class="field-hint" style="margin-bottom:16px;">Les dépenses les plus courantes sont déjà listées. Indique 0 si une ligne ne te concerne pas, et ajoute les tiennes en bas.</div>
+
+      <div class="col-headers col-headers-charges">
+        <div class="col-header">Nature de la dépense</div>
+        <div class="col-header">Montant mensuel HT</div>
+        <div></div>
+      </div>
+
+      <div class="dynamic-list" id="fraisList">
+        <div class="dynamic-row-charges preset-row">
+          <input type="text" value="Loyer / local professionnel" class="charge-nom">
+          <div class="input-with-suffix"><input type="number" placeholder="0" min="0" class="charge-montant"><span class="input-suffix">€</span></div>
+          <button class="btn-remove" onclick="removeRow(this, 'fraisList')" title="Supprimer">×</button>
+        </div>
+        <div class="dynamic-row-charges preset-row">
+          <input type="text" value="Publicité & marketing" class="charge-nom">
+          <div class="input-with-suffix"><input type="number" placeholder="0" min="0" class="charge-montant"><span class="input-suffix">€</span></div>
+          <button class="btn-remove" onclick="removeRow(this, 'fraisList')" title="Supprimer">×</button>
+        </div>
+        <div class="dynamic-row-charges preset-row">
+          <input type="text" value="Logiciels & abonnements" class="charge-nom">
+          <div class="input-with-suffix"><input type="number" placeholder="0" min="0" class="charge-montant"><span class="input-suffix">€</span></div>
+          <button class="btn-remove" onclick="removeRow(this, 'fraisList')" title="Supprimer">×</button>
+        </div>
+        <div class="dynamic-row-charges preset-row">
+          <input type="text" value="Téléphone & internet" class="charge-nom">
+          <div class="input-with-suffix"><input type="number" placeholder="0" min="0" class="charge-montant"><span class="input-suffix">€</span></div>
+          <button class="btn-remove" onclick="removeRow(this, 'fraisList')" title="Supprimer">×</button>
+        </div>
+        <div class="dynamic-row-charges preset-row">
+          <input type="text" value="Assurance professionnelle" class="charge-nom">
+          <div class="input-with-suffix"><input type="number" placeholder="0" min="0" class="charge-montant"><span class="input-suffix">€</span></div>
+          <button class="btn-remove" onclick="removeRow(this, 'fraisList')" title="Supprimer">×</button>
+        </div>
+        <div class="dynamic-row-charges preset-row">
+          <input type="text" value="Honoraires comptable" class="charge-nom">
+          <div class="input-with-suffix"><input type="number" placeholder="0" min="0" class="charge-montant"><span class="input-suffix">€</span></div>
+          <button class="btn-remove" onclick="removeRow(this, 'fraisList')" title="Supprimer">×</button>
+        </div>
+        <div class="dynamic-row-charges preset-row">
+          <input type="text" value="Frais bancaires" class="charge-nom">
+          <div class="input-with-suffix"><input type="number" placeholder="0" min="0" class="charge-montant"><span class="input-suffix">€</span></div>
+          <button class="btn-remove" onclick="removeRow(this, 'fraisList')" title="Supprimer">×</button>
+        </div>
+        <div class="dynamic-row-charges preset-row">
+          <input type="text" value="Frais de déplacement" class="charge-nom">
+          <div class="input-with-suffix"><input type="number" placeholder="0" min="0" class="charge-montant"><span class="input-suffix">€</span></div>
+          <button class="btn-remove" onclick="removeRow(this, 'fraisList')" title="Supprimer">×</button>
+        </div>
+        <div class="dynamic-row-charges preset-row">
+          <input type="text" value="Fournitures & petit matériel" class="charge-nom">
+          <div class="input-with-suffix"><input type="number" placeholder="0" min="0" class="charge-montant"><span class="input-suffix">€</span></div>
+          <button class="btn-remove" onclick="removeRow(this, 'fraisList')" title="Supprimer">×</button>
+        </div>
+        <div class="dynamic-row-charges preset-row">
+          <input type="text" value="Formation & documentation" class="charge-nom">
+          <div class="input-with-suffix"><input type="number" placeholder="0" min="0" class="charge-montant"><span class="input-suffix">€</span></div>
+          <button class="btn-remove" onclick="removeRow(this, 'fraisList')" title="Supprimer">×</button>
+        </div>
+      </div>
+      <button class="btn-add" onclick="addChargeRow('fraisList', 'Autre dépense…')">+ Ajouter une dépense</button>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 4 : Personnel -->
+  <div class="step" id="step-4">
+    <div class="step-header">
+      <div class="step-number">Étape 4 sur 7</div>
+      <h1 class="step-title">Toi et ton équipe</h1>
+      <p class="step-subtitle">Ce que tu prévois de te payer, et si tu as (ou prévois d'avoir) des employés.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Ta rémunération</div>
+
+      <div class="field">
+        <label for="remDirigeant">Combien tu veux te payer par mois ?</label>
+        <div class="field-hint">C'est ce que tu prévois de toucher chaque mois en tant que dirigeant. Indique 0 si tu ne te paies pas les premières années.</div>
+        <div class="input-with-suffix">
+          <input type="number" id="remDirigeant" placeholder="0" min="0">
+          <span class="input-suffix">€ / mois</span>
+        </div>
+      </div>
+
+      <div class="info-box" style="margin-top:16px; margin-bottom:0;">
+        <div class="info-box-icon">ℹ️</div>
+        <p>Les charges sociales du dirigeant sont calculées automatiquement à <strong>45%</strong> de ta rémunération. C'est la part que l'État prélève en plus de ton salaire.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Tes employés</div>
+
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <label for="toggleSalaries">Tu as ou prévois des employés ?</label>
+          <div class="field-hint">Si oui, tu pourras les renseigner ci-dessous.</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="toggleSalaries" onchange="toggleSection('salariesSection', this)">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="collapsible-section" id="salariesSection">
+        <div style="padding-top: 20px;">
+          <div class="col-headers" style="grid-template-columns: 1fr 140px 36px;">
+            <div class="col-header">Poste / rôle</div>
+            <div class="col-header">Salaire brut / mois</div>
+            <div></div>
+          </div>
+          <div class="dynamic-list" id="salariesList">
+            <div class="dynamic-row" style="grid-template-columns: 1fr 140px 36px;">
+              <input type="text" placeholder="Ex : Assistant, Graphiste…" class="sal-poste">
+              <div class="input-with-suffix">
+                <input type="number" placeholder="0" min="0" class="sal-salaire">
+                <span class="input-suffix">€</span>
+              </div>
+              <button class="btn-remove" onclick="removeRow(this, 'salariesList')" title="Supprimer">×</button>
+            </div>
+          </div>
+          <button class="btn-add" onclick="addSalarieRow()">+ Ajouter un employé</button>
+          <div class="info-box" style="margin-top: 16px; margin-bottom: 0;">
+            <div class="info-box-icon">ℹ️</div>
+            <p>Les charges patronales sont calculées automatiquement à <strong>42%</strong> du salaire brut de chaque employé.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 5 : Investissements -->
+  <div class="step" id="step-5">
+    <div class="step-header">
+      <div class="step-number">Étape 5 sur 7</div>
+      <h1 class="step-title">Tes achats importants & ton financement</h1>
+      <p class="step-subtitle">Les gros achats que tu fais une seule fois pour lancer ou développer ton activité, et comment tu les finances.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Tes investissements</div>
+      <div class="field-hint" style="margin-bottom:16px;">Un investissement, c'est un achat important qui va durer longtemps : matériel, ordinateur, véhicule, travaux, logiciel pro… Pas les petites dépenses du quotidien.</div>
+
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <label for="toggleInvest">Tu as des investissements à prévoir ?</label>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="toggleInvest" onchange="toggleSection('investSection', this)">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="collapsible-section" id="investSection">
+        <div style="padding-top: 20px;">
+          <div class="col-headers" style="grid-template-columns: 1fr 130px 110px 36px;">
+            <div class="col-header">Description</div>
+            <div class="col-header">Montant HT</div>
+            <div class="col-header">Durée de vie</div>
+            <div></div>
+          </div>
+          <div class="dynamic-list" id="investList">
+            <div class="dynamic-row" style="grid-template-columns: 1fr 130px 110px 36px;">
+              <input type="text" placeholder="Ex : Ordinateur, machine…" class="invest-nom">
+              <div class="input-with-suffix">
+                <input type="number" placeholder="0" min="0" class="invest-montant">
+                <span class="input-suffix">€</span>
+              </div>
+              <select class="invest-duree">
+                <option value="3">3 ans</option>
+                <option value="5" selected>5 ans</option>
+                <option value="7">7 ans</option>
+                <option value="10">10 ans</option>
+              </select>
+              <button class="btn-remove" onclick="removeRow(this, 'investList')" title="Supprimer">×</button>
+            </div>
+          </div>
+          <button class="btn-add" onclick="addInvestRow()">+ Ajouter un investissement</button>
+          <div class="info-box" style="margin-top:16px; margin-bottom:0;">
+            <div class="info-box-icon">ℹ️</div>
+            <p>La <strong>durée de vie</strong>, c'est combien d'années tu vas utiliser ce bien avant de le remplacer. Par défaut, on met 5 ans — c'est la valeur standard.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Comment tu finances tout ça ?</div>
+
+      <div class="field">
+        <label for="apportPersonnel">Tu mets combien de ta poche au départ ?</label>
+        <div class="field-hint">C'est ton apport personnel — l'argent que toi tu investis dans le projet.</div>
+        <div class="input-with-suffix">
+          <input type="number" id="apportPersonnel" placeholder="0" min="0">
+          <span class="input-suffix">€</span>
+        </div>
+      </div>
+
+      <div class="separator"></div>
+
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <label for="toggleEmprunt">Tu prévois un emprunt bancaire ?</label>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="toggleEmprunt" onchange="toggleSection('empruntSection', this)">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="collapsible-section" id="empruntSection">
+        <div style="padding-top: 20px;" class="grid-2">
+          <div class="field">
+            <label for="empruntMontant">Montant emprunté</label>
+            <div class="input-with-suffix">
+              <input type="number" id="empruntMontant" placeholder="0" min="0">
+              <span class="input-suffix">€</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="empruntTaux">Taux d'intérêt annuel</label>
+            <div class="input-with-suffix">
+              <input type="number" id="empruntTaux" placeholder="3.5" min="0" max="20" step="0.1">
+              <span class="input-suffix">%</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="empruntDuree">Durée du remboursement</label>
+            <select id="empruntDuree">
+              <option value="3">3 ans</option>
+              <option value="5">5 ans</option>
+              <option value="7" selected>7 ans</option>
+              <option value="10">10 ans</option>
+              <option value="15">15 ans</option>
+              <option value="20">20 ans</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="empruntDebut">Date de début du remboursement</label>
+            <input type="month" id="empruntDebut">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 6 : Trésorerie -->
+  <div class="step" id="step-6">
+    <div class="step-header">
+      <div class="step-number">Étape 6 sur 7</div>
+      <h1 class="step-title">Quand tu es payé… et quand tu paies</h1>
+      <p class="step-subtitle">Même si tu fais des ventes, l'argent n'arrive pas toujours tout de suite. Ces informations permettent de calculer ta trésorerie réelle.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Tes clients te paient…</div>
+      <div class="field">
+        <label>En combien de jours tes clients te paient-ils en général ?</label>
+        <div class="field-hint">Si tes clients paient tout de suite (carte bleue, PayPal…), choisis 0 jour. Si tu envoies des factures et qu'ils ont 30 jours pour payer, choisis 30.</div>
+        <div class="options-grid">
+          <label class="option-card selected">
+            <input type="radio" name="delaiClient" value="0" checked>
+            <div class="option-label">0 jour</div>
+            <div class="option-sub">Paiement immédiat</div>
+          </label>
+          <label class="option-card">
+            <input type="radio" name="delaiClient" value="30">
+            <div class="option-label">30 jours</div>
+            <div class="option-sub">1 mois</div>
+          </label>
+          <label class="option-card">
+            <input type="radio" name="delaiClient" value="45">
+            <div class="option-label">45 jours</div>
+          </label>
+          <label class="option-card">
+            <input type="radio" name="delaiClient" value="60">
+            <div class="option-label">60 jours</div>
+            <div class="option-sub">2 mois</div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Tu paies tes fournisseurs…</div>
+      <div class="field">
+        <label>En combien de jours paies-tu tes fournisseurs ?</label>
+        <div class="field-hint">Si tu paies immédiatement à la commande (carte bleue, virement direct…), choisis 0 jour.</div>
+        <div class="options-grid">
+          <label class="option-card selected">
+            <input type="radio" name="delaiFournisseur" value="0" checked>
+            <div class="option-label">0 jour</div>
+            <div class="option-sub">Paiement immédiat</div>
+          </label>
+          <label class="option-card">
+            <input type="radio" name="delaiFournisseur" value="30">
+            <div class="option-label">30 jours</div>
+            <div class="option-sub">1 mois</div>
+          </label>
+          <label class="option-card">
+            <input type="radio" name="delaiFournisseur" value="45">
+            <div class="option-label">45 jours</div>
+          </label>
+          <label class="option-card">
+            <input type="radio" name="delaiFournisseur" value="60">
+            <div class="option-label">60 jours</div>
+            <div class="option-sub">2 mois</div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Trésorerie de départ</div>
+      <div class="field">
+        <label for="tresoDepart">Tu as combien d'argent disponible au démarrage ?</label>
+        <div class="field-hint">C'est la somme que tu as en banque pour lancer ton activité, en dehors de ton apport personnel déjà renseigné à l'étape précédente. Si tu n'as rien de plus, indique 0.</div>
+        <div class="input-with-suffix">
+          <input type="number" id="tresoDepart" placeholder="0" min="0">
+          <span class="input-suffix">€</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 7 : Récapitulatif -->
+  <div class="step" id="step-7">
+    <div class="step-header">
+      <div class="step-number">Étape 7 sur 7</div>
+      <h1 class="step-title">Tout est prêt ✦</h1>
+      <p class="step-subtitle">Vérifie que tout est correct avant de générer ton prévisionnel.</p>
+    </div>
+
+    <div class="badge">✦ Récapitulatif de ton projet</div>
+
+    <div class="card recap-section">
+      <div class="recap-title">Projet</div>
+      <div class="recap-grid" id="recapProjet"></div>
+    </div>
+
+    <div class="card recap-section">
+      <div class="recap-title">Chiffre d'affaires estimé</div>
+      <div class="recap-grid" id="recapCA"></div>
+    </div>
+
+    <div class="card recap-section">
+      <div class="recap-title">Charges mensuelles</div>
+      <div class="recap-grid" id="recapCharges"></div>
+    </div>
+
+    <div class="card recap-section">
+      <div class="recap-title">Personnel & financement</div>
+      <div class="recap-grid" id="recapPersonnel"></div>
+    </div>
+
+    <div style="text-align:center; padding: 16px 0 80px;">
+      <p style="font-size:0.85rem; color:var(--gris); margin-bottom:16px;">Ton prévisionnel sera généré sur <strong style="color:var(--blanc);">3 documents</strong> : compte de résultat, bilan et plan de trésorerie.</p>
+    </div>
+  </div>
+
+</main>
+
+<!-- NAVIGATION -->
+<div class="nav-buttons">
+  <button class="btn-prev" id="btnPrev" onclick="prevStep()" disabled>← Retour</button>
+  <button class="btn-next" id="btnNext" onclick="nextStep()">Continuer →</button>
+</div>
+
+<script>
+  let currentStep = 1;
+  const totalSteps = 7;
+
+  const stepLabels = [
+    "Informations générales",
+    "Chiffre d'affaires",
+    "Dépenses régulières",
+    "Personnel",
+    "Investissements & financement",
+    "Trésorerie",
+    "Récapitulatif"
+  ];
+
+  function updateProgress() {
+    const pct = (currentStep / totalSteps) * 100;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('stepLabel').textContent = stepLabels[currentStep - 1];
+    document.getElementById('stepCount').textContent = currentStep + ' / ' + totalSteps;
+    document.getElementById('btnPrev').disabled = currentStep === 1;
+    const btnNext = document.getElementById('btnNext');
+    if (currentStep === totalSteps) {
+      btnNext.textContent = '✦ Générer mon prévisionnel';
+      btnNext.onclick = generatePrevisionnel;
+    } else {
+      btnNext.innerHTML = 'Continuer →';
+      btnNext.onclick = nextStep;
+    }
+  }
+
+  function nextStep() {
+    if (currentStep < totalSteps) {
+      document.getElementById('step-' + currentStep).classList.remove('active');
+      currentStep++;
+      document.getElementById('step-' + currentStep).classList.add('active');
+      if (currentStep === totalSteps) buildRecap();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      updateProgress();
+    }
+  }
+
+  function prevStep() {
+    if (currentStep > 1) {
+      document.getElementById('step-' + currentStep).classList.remove('active');
+      currentStep--;
+      document.getElementById('step-' + currentStep).classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      updateProgress();
+    }
+  }
+
+  // Option cards click
+  document.addEventListener('click', function(e) {
+    const card = e.target.closest('.option-card');
+    if (!card) return;
+    const radio = card.querySelector('input[type="radio"]');
+    if (!radio) return;
+    const name = radio.name;
+    document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+      r.closest('.option-card').classList.remove('selected');
+    });
+    card.classList.add('selected');
+    radio.checked = true;
+  });
+
+  // Toggle sections
+  function toggleSection(id, checkbox) {
+    const section = document.getElementById(id);
+    section.classList.toggle('open', checkbox.checked);
+  }
+
+  // Dynamic rows
+  function removeRow(btn, listId) {
+    const list = document.getElementById(listId);
+    const rows = list.querySelectorAll('.dynamic-row, .dynamic-row-3, .dynamic-row-charges');
+    if (rows.length > 1) btn.closest('.dynamic-row, .dynamic-row-3, .dynamic-row-charges').remove();
+  }
+
+  function addCARow() {
+    const list = document.getElementById('caList');
+    const row = document.createElement('div');
+    row.className = 'dynamic-row dynamic-row-3';
+    row.innerHTML = `
+      <input type="text" placeholder="Ex : Formation en ligne, T-shirt…" class="ca-nom">
+      <div class="input-with-suffix">
+        <input type="number" placeholder="0" min="0" class="ca-prix">
+        <span class="input-suffix">€</span>
+      </div>
+      <div class="input-with-suffix">
+        <input type="number" placeholder="0" min="0" class="ca-qte">
+        <span class="input-suffix">×</span>
+      </div>
+      <button class="btn-remove" onclick="removeRow(this, 'caList')" title="Supprimer">×</button>
+    `;
+    list.appendChild(row);
+  }
+
+  function addChargeRow(listId, placeholder) {
+    const list = document.getElementById(listId);
+    const row = document.createElement('div');
+    row.className = 'dynamic-row-charges';
+    row.innerHTML = `
+      <input type="text" placeholder="${placeholder}" class="charge-nom">
+      <div class="input-with-suffix">
+        <input type="number" placeholder="0" min="0" class="charge-montant">
+        <span class="input-suffix">€</span>
+      </div>
+      <button class="btn-remove" onclick="removeRow(this, '${listId}')" title="Supprimer">×</button>
+    `;
+    list.appendChild(row);
+  }
+
+  function addSalarieRow() {
+    const list = document.getElementById('salariesList');
+    const row = document.createElement('div');
+    row.className = 'dynamic-row';
+    row.style.gridTemplateColumns = '1fr 140px 36px';
+    row.innerHTML = `
+      <input type="text" placeholder="Ex : Assistant, Graphiste…" class="sal-poste">
+      <div class="input-with-suffix">
+        <input type="number" placeholder="0" min="0" class="sal-salaire">
+        <span class="input-suffix">€</span>
+      </div>
+      <button class="btn-remove" onclick="removeRow(this, 'salariesList')" title="Supprimer">×</button>
+    `;
+    list.appendChild(row);
+  }
+
+  function addInvestRow() {
+    const list = document.getElementById('investList');
+    const row = document.createElement('div');
+    row.className = 'dynamic-row';
+    row.style.gridTemplateColumns = '1fr 130px 110px 36px';
+    row.innerHTML = `
+      <input type="text" placeholder="Ex : Ordinateur, machine…" class="invest-nom">
+      <div class="input-with-suffix">
+        <input type="number" placeholder="0" min="0" class="invest-montant">
+        <span class="input-suffix">€</span>
+      </div>
+      <select class="invest-duree">
+        <option value="3">3 ans</option>
+        <option value="5" selected>5 ans</option>
+        <option value="7">7 ans</option>
+        <option value="10">10 ans</option>
+      </select>
+      <button class="btn-remove" onclick="removeRow(this, 'investList')" title="Supprimer">×</button>
+    `;
+    list.appendChild(row);
+  }
+
+  // RECAP
+  function buildRecap() {
+    // Projet
+    const recapProjet = document.getElementById('recapProjet');
+    const nom = document.getElementById('nomProjet').value || '—';
+    const secteur = document.getElementById('secteur');
+    const secteurText = secteur.options[secteur.selectedIndex]?.text || '—';
+    const forme = document.querySelector('input[name="formeJuridique"]:checked')?.value || '—';
+    const date = document.getElementById('dateDemarrage').value || '—';
+    const duree = document.querySelector('input[name="duree"]:checked')?.value || '3';
+    recapProjet.innerHTML = `
+      <div class="recap-row"><span class="recap-key">Nom du projet</span><span class="recap-val">${nom}</span></div>
+      <div class="recap-row"><span class="recap-key">Activité</span><span class="recap-val">${secteurText}</span></div>
+      <div class="recap-row"><span class="recap-key">Forme juridique</span><span class="recap-val">${forme}</span></div>
+      <div class="recap-row"><span class="recap-key">Démarrage</span><span class="recap-val">${date}</span></div>
+      <div class="recap-row"><span class="recap-key">Durée du prévisionnel</span><span class="recap-val">${duree} an${duree > 1 ? 's' : ''}</span></div>
+    `;
+
+    // CA
+    const recapCA = document.getElementById('recapCA');
+    const caRows = document.querySelectorAll('#caList .dynamic-row-3');
+    let caTotal = 0;
+    let caHTML = '';
+    caRows.forEach(row => {
+      const nom = row.querySelector('.ca-nom')?.value;
+      const prix = parseFloat(row.querySelector('.ca-prix')?.value) || 0;
+      const qte = parseFloat(row.querySelector('.ca-qte')?.value) || 0;
+      const total = prix * qte;
+      caTotal += total;
+      if (nom || prix || qte) {
+        caHTML += `<div class="recap-row"><span class="recap-key">${nom || 'Produit'}</span><span class="recap-val">${formatEur(total)} / mois</span></div>`;
+      }
+    });
+    caHTML += `<div class="recap-row" style="border-top:1px solid var(--bordure); margin-top:4px;"><span class="recap-key" style="color:var(--or); font-weight:600;">Total mensuel estimé</span><span class="recap-val" style="color:var(--or);">${formatEur(caTotal)}</span></div>`;
+    recapCA.innerHTML = caHTML;
+
+    // Charges
+    const recapCharges = document.getElementById('recapCharges');
+    let chargesTotal = 0;
+    let chargesHTML = '';
+    document.querySelectorAll('#achatsList .dynamic-row-charges, #fraisList .dynamic-row-charges').forEach(row => {
+      const nom = row.querySelector('.charge-nom')?.value;
+      const montant = parseFloat(row.querySelector('.charge-montant')?.value) || 0;
+      chargesTotal += montant;
+      if (nom || montant) {
+        chargesHTML += `<div class="recap-row"><span class="recap-key">${nom || 'Charge'}</span><span class="recap-val">${formatEur(montant)} / mois</span></div>`;
+      }
+    });
+    chargesHTML += `<div class="recap-row" style="border-top:1px solid var(--bordure); margin-top:4px;"><span class="recap-key" style="color:var(--or); font-weight:600;">Total charges mensuelles</span><span class="recap-val" style="color:var(--or);">${formatEur(chargesTotal)}</span></div>`;
+    recapCharges.innerHTML = chargesHTML;
+
+    // Personnel
+    const recapPersonnel = document.getElementById('recapPersonnel');
+    const remDir = parseFloat(document.getElementById('remDirigeant').value) || 0;
+    const apport = parseFloat(document.getElementById('apportPersonnel').value) || 0;
+    const emprunt = parseFloat(document.getElementById('empruntMontant').value) || 0;
+    const delaiClient = document.querySelector('input[name="delaiClient"]:checked')?.value || '0';
+    const delaiFourn = document.querySelector('input[name="delaiFournisseur"]:checked')?.value || '0';
+    recapPersonnel.innerHTML = `
+      <div class="recap-row"><span class="recap-key">Rémunération dirigeant</span><span class="recap-val">${formatEur(remDir)} / mois</span></div>
+      <div class="recap-row"><span class="recap-key">Apport personnel</span><span class="recap-val">${formatEur(apport)}</span></div>
+      ${emprunt > 0 ? `<div class="recap-row"><span class="recap-key">Emprunt bancaire</span><span class="recap-val">${formatEur(emprunt)}</span></div>` : ''}
+      <div class="recap-row"><span class="recap-key">Délai paiement clients</span><span class="recap-val">${delaiClient} jour${delaiClient > 1 ? 's' : ''}</span></div>
+      <div class="recap-row"><span class="recap-key">Délai paiement fournisseurs</span><span class="recap-val">${delaiFourn} jour${delaiFourn > 1 ? 's' : ''}</span></div>
+    `;
+  }
+
+  function formatEur(n) {
+    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+  }
+
+  // ── COLLECTE DES DONNÉES DU FORMULAIRE ────────────────────────────────────
+  function collectFormData() {
+    // Étape 1
+    const nom = document.getElementById('nomProjet')?.value || '';
+    const secteur = document.getElementById('secteur')?.value || '';
+    const formeJuridique = document.querySelector('input[name="formeJuridique"]:checked')?.value || '';
+    const dateDemarrage = document.getElementById('dateDemarrage')?.value || '';
+    const duree = parseInt(document.querySelector('input[name="duree"]:checked')?.value || '3');
+
+    // Étape 2 — Ventes
+    const ventes = [];
+    document.querySelectorAll('#caList .dynamic-row-3').forEach(row => {
+      const libelle = row.querySelector('.ca-nom')?.value || '';
+      const prix    = parseFloat(row.querySelector('.ca-prix')?.value) || 0;
+      const qte     = parseFloat(row.querySelector('.ca-qte')?.value) || 0;
+      if (libelle || prix || qte) ventes.push({ libelle, prix, qte });
+    });
+    const croissanceAn2 = parseFloat(document.getElementById('croissanceAn2')?.value) || 20;
+    const croissanceAn3 = parseFloat(document.getElementById('croissanceAn3')?.value) || 20;
+
+    // Étape 3 — Charges achats
+    const achats = [];
+    document.querySelectorAll('#achatsList .dynamic-row-charges').forEach(row => {
+      const nature  = row.querySelector('.charge-nom')?.value || '';
+      const montant = parseFloat(row.querySelector('.charge-montant')?.value) || 0;
+      if (nature || montant) achats.push({ nature, montant });
+    });
+
+    // Étape 3 — Frais de fonctionnement
+    const frais = [];
+    document.querySelectorAll('#fraisList .dynamic-row-charges').forEach(row => {
+      const nature  = row.querySelector('.charge-nom')?.value || '';
+      const montant = parseFloat(row.querySelector('.charge-montant')?.value) || 0;
+      if (nature || montant) frais.push({ nature, montant });
+    });
+
+    // Étape 4 — Personnel
+    const remDirigeant = parseFloat(document.getElementById('remDirigeant')?.value) || 0;
+    const salaries = [];
+    document.querySelectorAll('#salariesList .dynamic-row').forEach(row => {
+      const poste   = row.querySelector('.sal-poste')?.value || '';
+      const salaire = parseFloat(row.querySelector('.sal-salaire')?.value) || 0;
+      if (poste || salaire) salaries.push({ poste, salaire });
+    });
+
+    // Étape 5 — Investissements
+    const investissements = [];
+    document.querySelectorAll('#investList .dynamic-row').forEach(row => {
+      const label   = row.querySelector('.invest-nom')?.value || '';
+      const montant = parseFloat(row.querySelector('.invest-montant')?.value) || 0;
+      const dureeI  = parseInt(row.querySelector('.invest-duree')?.value) || 5;
+      if (label || montant) investissements.push({ label, montant, duree: dureeI });
+    });
+    const apport         = parseFloat(document.getElementById('apportPersonnel')?.value) || 0;
+    const empruntMontant = parseFloat(document.getElementById('empruntMontant')?.value) || 0;
+    const empruntTaux    = parseFloat(document.getElementById('empruntTaux')?.value) || 3.5;
+    const empruntDuree   = parseInt(document.getElementById('empruntDuree')?.value) || 7;
+
+    // Étape 6 — Trésorerie
+    const delaiClient      = parseInt(document.querySelector('input[name="delaiClient"]:checked')?.value) || 0;
+    const delaiFournisseur = parseInt(document.querySelector('input[name="delaiFournisseur"]:checked')?.value) || 0;
+    const tresoDepart      = parseFloat(document.getElementById('tresoDepart')?.value) || 0;
+
+    return {
+      type: 'classique',
+      nom, secteur, forme_juridique: formeJuridique,
+      date_demarrage: dateDemarrage,
+      duree, croissance_an2: croissanceAn2, croissance_an3: croissanceAn3,
+      ventes, achats, frais, salaries, investissements,
+      dirigeant_rem: remDirigeant,
+      apport, emprunt: empruntMontant,
+      taux_emprunt: empruntTaux, duree_emprunt: empruntDuree,
+      delai_client: delaiClient, delai_fournisseur: delaiFournisseur,
+      treso_depart: tresoDepart,
+    };
+  }
+
+  // ── GÉNÉRATION PDF ─────────────────────────────────────────────────────────
+  async function generatePrevisionnel() {
+    const btn = document.getElementById('btnNext');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '⏳ Génération en cours…';
+    btn.disabled = true;
+
+    try {
+      const data = collectFormData();
+
+      // Détermine l'URL du backend Railway
+      // En production remplace par ton URL Railway réelle
+      const RAILWAY_URL = (window.RAILWAY_URL || 'https://selfless-youth-production-cb7f.up.railway.app');
+
+      const response = await fetch(`${RAILWAY_URL}/generate-pdf`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) throw new Error(`Erreur serveur : ${response.status}`);
+
+      const result = await response.json();
+
+      if (result.pdf_url) {
+        // ── Envoie l'URL du PDF à Bubble via postMessage ──
+        window.parent.postMessage({
+          type: 'PREVANA_PDF_READY',
+          pdf_url: result.pdf_url,
+          previsionnel_data: data,
+          status: 'success'
+        }, '*');
+
+        // Affiche le bouton de téléchargement dans le formulaire
+        showDownloadButton(result.pdf_url);
+      } else {
+        throw new Error('URL du PDF non reçue');
+      }
+
+    } catch (err) {
+      console.error('Erreur génération PDF:', err);
+      window.parent.postMessage({
+        type: 'PREVANA_PDF_ERROR',
+        error: err.message,
+        status: 'error'
+      }, '*');
+      alert('Une erreur est survenue lors de la génération. Vérifie ta connexion et réessaie.');
+    } finally {
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    }
+  }
+
+  function showDownloadButton(pdfUrl) {
+    // Remplace le bouton Générer par un bouton Télécharger
+    const nav = document.querySelector('.nav-buttons');
+    const existing = document.getElementById('btn-download');
+    if (existing) existing.remove();
+
+    const dlBtn = document.createElement('a');
+    dlBtn.id = 'btn-download';
+    dlBtn.href = pdfUrl;
+    dlBtn.target = '_blank';
+    dlBtn.className = 'btn-next';
+    dlBtn.style.cssText = 'background: linear-gradient(135deg,#4CAF7D,#7FDBA8); text-decoration:none; margin-left:12px;';
+    dlBtn.innerHTML = '↓ Télécharger mon PDF';
+    nav.appendChild(dlBtn);
+  }
+
+  // Reçoit l'user_id et le token de Bubble si nécessaire
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'PREVANA_INIT') {
+      window.RAILWAY_URL   = event.data.railway_url || window.RAILWAY_URL;
+      window.BUBBLE_USER   = event.data.user_id || '';
+    }
+  });
+
+  updateProgress();
+</script>
+</body>
+</html>

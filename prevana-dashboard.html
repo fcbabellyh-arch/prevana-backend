@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prevana — Mon espace</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--or:#C9A84C;--or-clair:#E8C97A;--blanc:#F0EDE8;--gris:#8A8AAA;--noir:#0A0A0F;--anthracite:#141420;--carte:#1A1A2E;--bordure:#2A2A45;--vert:#4CAF7D;--rouge:#E05A5A;--bleu:#5A8AE0;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--noir);color:var(--blanc);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;}
+.sidebar{position:fixed;top:0;left:0;width:220px;height:100vh;background:var(--anthracite);border-right:1px solid var(--bordure);display:flex;flex-direction:column;padding:24px 0;z-index:100;}
+.sidebar-logo{padding:0 24px 28px;border-bottom:1px solid var(--bordure);}
+.logo-text{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;}
+.logo-text .or{color:var(--or);}.logo-text .wh{color:var(--blanc);}
+.tagline{font-size:0.7rem;color:var(--gris);margin-top:4px;font-style:italic;}
+.sidebar-nav{flex:1;padding:20px 12px;display:flex;flex-direction:column;gap:4px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;cursor:pointer;font-size:0.85rem;color:var(--gris);transition:all 0.2s;border:none;background:none;width:100%;text-align:left;}
+.nav-item:hover{background:rgba(201,168,76,0.08);color:var(--blanc);}
+.nav-item.active{background:rgba(201,168,76,0.12);color:var(--or);font-weight:600;}
+.sidebar-footer{padding:16px 24px;border-top:1px solid var(--bordure);}
+.user-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--or),var(--or-clair));display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--noir);font-size:0.85rem;flex-shrink:0;}
+.user-info{display:flex;align-items:center;gap:10px;}
+.user-name{font-size:0.82rem;font-weight:600;color:var(--blanc);}
+.user-plan{font-size:0.72rem;color:var(--gris);}
+.main{margin-left:220px;flex:1;padding:32px 36px;}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;}
+.page-title{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;}
+.page-title span{color:var(--or);}
+.btn-new{background:linear-gradient(135deg,var(--or),var(--or-clair));border:none;border-radius:50px;color:var(--noir);padding:11px 24px;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;transition:all 0.2s;}
+.btn-new:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(201,168,76,0.3);}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;}
+.stat-card{background:var(--carte);border:1px solid var(--bordure);border-radius:14px;padding:20px 22px;}
+.stat-label{font-size:0.75rem;color:var(--gris);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;}
+.stat-value{font-family:'DM Mono',monospace;font-size:1.8rem;font-weight:500;line-height:1;}
+.stat-value.or{color:var(--or);}.stat-value.vert{color:var(--vert);}
+.stat-sub{font-size:0.72rem;color:var(--gris);margin-top:6px;}
+.section-title{font-size:0.78rem;font-weight:600;color:var(--or);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:16px;}
+.abo-card{background:var(--carte);border:1px solid var(--bordure);border-radius:16px;padding:24px;display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:16px;}
+.abo-left{display:flex;align-items:center;gap:16px;}
+.abo-icon{width:48px;height:48px;border-radius:12px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);display:flex;align-items:center;justify-content:center;font-size:1.3rem;}
+.abo-name{font-weight:700;font-size:1rem;color:var(--blanc);}
+.abo-detail{font-size:0.8rem;color:var(--gris);margin-top:3px;}
+.abo-right{display:flex;align-items:center;gap:12px;}
+.btn-portal{background:transparent;border:1px solid var(--bordure);border-radius:8px;color:var(--gris);padding:9px 18px;font-size:0.82rem;cursor:pointer;transition:all 0.2s;}
+.btn-portal:hover{border-color:var(--or);color:var(--or);}
+.btn-upgrade{background:linear-gradient(135deg,var(--or),var(--or-clair));border:none;border-radius:8px;color:var(--noir);padding:9px 18px;font-size:0.82rem;font-weight:600;cursor:pointer;}
+.prev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:32px;}
+.prev-card{background:var(--carte);border:1px solid var(--bordure);border-radius:16px;padding:22px;cursor:pointer;transition:all 0.2s;}
+.prev-card:hover{border-color:rgba(201,168,76,0.3);transform:translateY(-2px);}
+.prev-card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
+.prev-icon{width:40px;height:40px;border-radius:10px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
+.prev-badge{font-size:0.68rem;font-weight:600;padding:3px 10px;border-radius:20px;}
+.badge-genere{background:rgba(76,175,125,0.15);color:var(--vert);border:1px solid rgba(76,175,125,0.3);}
+.badge-brouillon{background:rgba(138,138,170,0.1);color:var(--gris);border:1px solid var(--bordure);}
+.prev-name{font-weight:600;font-size:0.95rem;color:var(--blanc);margin-bottom:6px;}
+.prev-type{font-size:0.78rem;color:var(--gris);}
+.prev-date{font-size:0.72rem;color:var(--gris);margin-top:12px;padding-top:12px;border-top:1px solid var(--bordure);}
+.prev-actions{display:flex;gap:8px;margin-top:14px;}
+.btn-sm{padding:7px 14px;border-radius:8px;font-size:0.78rem;font-weight:600;cursor:pointer;border:1px solid var(--bordure);background:transparent;color:var(--gris);transition:all 0.2s;}
+.btn-sm:hover{border-color:var(--or);color:var(--or);}
+.btn-sm.primary{background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.3);color:var(--or);}
+.empty-state{text-align:center;padding:60px 20px;border:1px dashed var(--bordure);border-radius:16px;}
+.empty-icon{font-size:2.5rem;margin-bottom:16px;opacity:0.4;}
+.empty-title{font-size:1rem;font-weight:600;color:var(--blanc);margin-bottom:8px;}
+.empty-sub{font-size:0.85rem;color:var(--gris);}
+@media(max-width:768px){.sidebar{display:none;}.main{margin-left:0;padding:20px;}.stats-grid{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text"><span class="or">prev</span><span class="wh">ana</span></div>
+    <div class="tagline">Anticipez, réussissez</div>
+  </div>
+  <nav class="sidebar-nav">
+    <button class="nav-item active" onclick="sendToBubble('NAVIGATE',{section:'dashboard'})"><span>◉</span> Tableau de bord</button>
+    <button class="nav-item" onclick="sendToBubble('NAVIGATE',{section:'previsionnels'})"><span>📊</span> Mes prévisionnels</button>
+    <button class="nav-item" onclick="sendToBubble('NAVIGATE',{section:'suivi'})"><span>📈</span> Prévu vs Réel</button>
+    <button class="nav-item" onclick="sendToBubble('NAVIGATE',{section:'abonnement'})"><span>⚡</span> Mon abonnement</button>
+    <button class="nav-item" onclick="sendToBubble('NAVIGATE',{section:'profil'})"><span>👤</span> Mon profil</button>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar" id="avatarInitials">FC</div>
+      <div>
+        <div class="user-name" id="userName">Utilisateur</div>
+        <div class="user-plan" id="userPlan">Plan Starter</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="page-header">
+    <div class="page-title">Bonjour <span id="greetName">👋</span></div>
+    <button class="btn-new" onclick="sendToBubble('NOUVEAU_PREVISIONNEL')">✦ Nouveau prévisionnel</button>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-label">Prévisionnels actifs</div><div class="stat-value or" id="statActifs">0</div><div class="stat-sub">inclus dans ton plan</div></div>
+    <div class="stat-card"><div class="stat-label">PDFs générés</div><div class="stat-value" id="statPdfs">0</div><div class="stat-sub">au total</div></div>
+    <div class="stat-card"><div class="stat-label">Abonnement</div><div class="stat-value vert">Actif</div><div class="stat-sub" id="statAboPlan">Plan Starter</div></div>
+    <div class="stat-card"><div class="stat-label">Renouvellement</div><div class="stat-value" id="statRenew" style="font-size:1.1rem;">—</div><div class="stat-sub">automatique</div></div>
+  </div>
+
+  <div class="section-title">Mon abonnement</div>
+  <div class="abo-card">
+    <div class="abo-left">
+      <div class="abo-icon">⚡</div>
+      <div>
+        <div class="abo-name" id="aboName">Plan Starter</div>
+        <div class="abo-detail" id="aboDetail">2 prévisionnels actifs · 14,90 €/mois</div>
+      </div>
+    </div>
+    <div class="abo-right">
+      <button class="btn-portal" onclick="sendToBubble('GERER_ABONNEMENT')">Gérer mon abonnement</button>
+      <button class="btn-upgrade" onclick="sendToBubble('UPGRADER')">Passer au Pro →</button>
+    </div>
+  </div>
+
+  <div class="section-title">Mes prévisionnels</div>
+  <div class="prev-grid" id="prevGrid">
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">📋</div>
+      <div class="empty-title">Aucun prévisionnel pour l'instant</div>
+      <div class="empty-sub">Crée ton premier prévisionnel en cliquant sur "Nouveau prévisionnel"</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function sendToBubble(action, data={}) {
+  window.parent.postMessage({ type: 'PREVANA_ACTION', action, ...data }, '*');
+}
+
+window.addEventListener('message', function(e) {
+  if (!e.data) return;
+  if (e.data.type === 'PREVANA_USER_DATA') initUser(e.data);
+  if (e.data.type === 'PREVANA_PREVISIONNELS') loadPrevisionnels(e.data.list || []);
+});
+
+function initUser(d) {
+  const name = d.user_name || 'Utilisateur';
+  document.getElementById('greetName').textContent = name.split(' ')[0] + ' 👋';
+  document.getElementById('userName').textContent = name;
+  document.getElementById('userPlan').textContent = d.plan_name || 'Starter';
+  document.getElementById('avatarInitials').textContent = name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('aboName').textContent = d.plan_name || 'Plan Starter';
+  document.getElementById('aboDetail').textContent = d.plan_detail || '2 prévisionnels · 14,90 €/mois';
+  document.getElementById('statAboPlan').textContent = d.plan_name || 'Plan Starter';
+  if (d.renew_date) document.getElementById('statRenew').textContent = d.renew_date;
+}
+
+function loadPrevisionnels(list) {
+  const grid = document.getElementById('prevGrid');
+  const empty = document.getElementById('emptyState');
+  document.getElementById('statActifs').textContent = list.length;
+  document.getElementById('statPdfs').textContent = list.filter(p=>p.pdf_url).length;
+  grid.querySelectorAll('.prev-card').forEach(c=>c.remove());
+  if (!list.length) { empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  list.forEach(p => {
+    const genere = p.statut === 'généré';
+    const card = document.createElement('div');
+    card.className = 'prev-card';
+    card.innerHTML = `
+      <div class="prev-card-header">
+        <div class="prev-icon">${p.type==='immobilier'?'🏠':'📊'}</div>
+        <span class="prev-badge ${genere?'badge-genere':'badge-brouillon'}">${genere?'Généré':'Brouillon'}</span>
+      </div>
+      <div class="prev-name">${p.nom||'Sans nom'}</div>
+      <div class="prev-type">${p.type==='immobilier'?'Prévisionnel Immobilier':'Prévisionnel Classique'}</div>
+      <div class="prev-date">${p.date||'—'}</div>
+      <div class="prev-actions">
+        <button class="btn-sm primary" onclick="sendToBubble('OUVRIR',{id:'${p.id}'})">Ouvrir</button>
+        ${genere&&p.pdf_url?`<button class="btn-sm" onclick="window.open('${p.pdf_url}','_blank')">↓ PDF</button>`:''}
+        <button class="btn-sm" onclick="sendToBubble('SUPPRIMER',{id:'${p.id}'})">Supprimer</button>
+      </div>`;
+    grid.insertBefore(card, empty);
+  });
+}
+
+// Mode démo si chargé seul
+setTimeout(()=>{ if(!window._bubble){ initUser({user_name:'François-Charles',plan_name:'Plan Starter',plan_detail:'2 prévisionnels · 14,90 €/mois',renew_date:'06/05/2026'}); loadPrevisionnels([{id:'1',nom:'Mon E-commerce',type:'classique',statut:'généré',pdf_url:'#',date:'05/04/2026'},{id:'2',nom:'Investissement locatif',type:'immobilier',statut:'brouillon',date:'04/04/2026'}]); }},500);
+</script>
+</body>
+</html>

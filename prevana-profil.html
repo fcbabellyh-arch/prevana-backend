@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prevana — Mon profil</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--or:#C9A84C;--or-clair:#E8C97A;--blanc:#F0EDE8;--gris:#8A8AAA;--noir:#0A0A0F;--anth:#141420;--carte:#1A1A2E;--bord:#2A2A45;--vert:#4CAF7D;--rouge:#E05A5A;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--noir);color:var(--blanc);font-family:'DM Sans',sans-serif;min-height:100vh;}
+header{background:var(--anth);border-bottom:1px solid var(--bord);padding:18px 40px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:'Playfair Display',serif;font-weight:900;font-size:1.4rem;}
+.logo span:first-child{color:var(--or);}
+.back-btn{background:transparent;border:1px solid var(--bord);border-radius:8px;color:var(--gris);padding:8px 16px;font-family:'DM Sans',sans-serif;font-size:0.85rem;cursor:pointer;transition:all 0.2s;}
+.back-btn:hover{border-color:var(--or);color:var(--or);}
+
+.container{max-width:700px;margin:0 auto;padding:40px 20px;}
+
+/* AVATAR */
+.profile-header{display:flex;align-items:center;gap:24px;margin-bottom:40px;}
+.avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--or),var(--or-clair));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:var(--noir);flex-shrink:0;border:3px solid rgba(201,168,76,0.3);}
+.profile-meta h1{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;margin-bottom:4px;}
+.profile-meta p{font-size:0.85rem;color:var(--gris);}
+.plan-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.25);border-radius:20px;padding:3px 10px;font-size:0.72rem;font-weight:600;color:var(--or);margin-top:6px;}
+
+/* SECTIONS */
+.section{background:var(--carte);border:1px solid var(--bord);border-radius:16px;padding:28px;margin-bottom:20px;}
+.section-title{font-size:0.72rem;font-weight:600;color:var(--or);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:20px;}
+
+.field-group{margin-bottom:20px;}
+.field-label{font-size:0.78rem;color:var(--gris);margin-bottom:6px;display:block;}
+.field-input{width:100%;background:var(--noir);border:1px solid var(--bord);border-radius:8px;padding:11px 14px;color:var(--blanc);font-family:'DM Sans',sans-serif;font-size:0.9rem;transition:border-color 0.2s;outline:none;}
+.field-input:focus{border-color:var(--or);}
+.field-input::placeholder{color:var(--gris);}
+
+.btn-save{background:linear-gradient(135deg,var(--or),var(--or-clair));border:none;border-radius:50px;color:var(--noir);padding:12px 28px;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.btn-save:hover{opacity:0.9;transform:translateY(-1px);}
+
+.btn-secondary{background:transparent;border:1px solid var(--bord);border-radius:50px;color:var(--gris);padding:12px 28px;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:500;cursor:pointer;transition:all 0.2s;margin-left:12px;}
+.btn-secondary:hover{border-color:var(--or);color:var(--or);}
+
+/* ABONNEMENT CARD */
+.sub-card{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.sub-info h3{font-size:1rem;font-weight:600;color:var(--blanc);margin-bottom:4px;}
+.sub-info p{font-size:0.82rem;color:var(--gris);}
+.sub-badge{background:rgba(76,175,125,0.12);border:1px solid rgba(76,175,125,0.25);border-radius:20px;padding:4px 12px;font-size:0.72rem;font-weight:600;color:var(--vert);}
+.btn-manage{background:transparent;border:1px solid var(--bord);border-radius:8px;color:var(--gris);padding:9px 18px;font-family:'DM Sans',sans-serif;font-size:0.82rem;cursor:pointer;transition:all 0.2s;}
+.btn-manage:hover{border-color:var(--or);color:var(--or);}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.stat-box{background:var(--noir);border:1px solid var(--bord);border-radius:10px;padding:16px;text-align:center;}
+.stat-num{font-family:'DM Mono',monospace;font-size:1.6rem;font-weight:500;color:var(--or);margin-bottom:4px;}
+.stat-label{font-size:0.72rem;color:var(--gris);}
+
+/* DANGER ZONE */
+.danger-section{background:rgba(224,90,90,0.04);border:1px solid rgba(224,90,90,0.15);border-radius:16px;padding:24px;margin-bottom:20px;}
+.danger-title{font-size:0.72rem;font-weight:600;color:var(--rouge);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:16px;}
+.danger-item{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.danger-item p{font-size:0.85rem;color:var(--gris);}
+.btn-danger{background:transparent;border:1px solid rgba(224,90,90,0.3);border-radius:8px;color:var(--rouge);padding:9px 18px;font-family:'DM Sans',sans-serif;font-size:0.82rem;cursor:pointer;transition:all 0.2s;}
+.btn-danger:hover{background:rgba(224,90,90,0.08);border-color:var(--rouge);}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--vert);color:var(--noir);padding:12px 24px;border-radius:50px;font-size:0.85rem;font-weight:600;transition:transform 0.3s;z-index:999;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+@media(max-width:600px){.stats-row{grid-template-columns:1fr 1fr;}.sub-card{flex-direction:column;}.btn-secondary{margin-left:0;margin-top:8px;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span>prev</span><span>ana</span></div>
+  <button class="back-btn" onclick="goBack()">← Tableau de bord</button>
+</header>
+
+<div class="container">
+
+  <!-- PROFIL HEADER -->
+  <div class="profile-header">
+    <div class="avatar" id="avatarInitial">?</div>
+    <div class="profile-meta">
+      <h1 id="displayName">Mon profil</h1>
+      <p id="displayEmail">—</p>
+      <div class="plan-chip">✦ <span id="displayPlan">—</span></div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="section">
+    <div class="section-title">Mon activité</div>
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-num" id="statPrevs">0</div>
+        <div class="stat-label">Prévisionnels créés</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="statActifs">0</div>
+        <div class="stat-label">Actifs ce mois</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="statPdfs">0</div>
+        <div class="stat-label">PDFs générés</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INFORMATIONS PERSONNELLES -->
+  <div class="section">
+    <div class="section-title">Informations personnelles</div>
+    <div class="field-group">
+      <label class="field-label">Prénom</label>
+      <input type="text" id="inputPrenom" class="field-input" placeholder="Ton prénom">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Email</label>
+      <input type="email" id="inputEmail" class="field-input" placeholder="ton@email.com">
+    </div>
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:8px;">
+      <button class="btn-save" onclick="saveProfile()">Enregistrer</button>
+      <button class="btn-secondary" onclick="changePassword()">Changer mon mot de passe</button>
+    </div>
+  </div>
+
+  <!-- MOT DE PASSE -->
+  <div class="section" id="passwordSection" style="display:none;">
+    <div class="section-title">Nouveau mot de passe</div>
+    <div class="field-group">
+      <label class="field-label">Mot de passe actuel</label>
+      <input type="password" id="inputOldPwd" class="field-input" placeholder="••••••••">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Nouveau mot de passe</label>
+      <input type="password" id="inputNewPwd" class="field-input" placeholder="••••••••">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Confirmer le nouveau mot de passe</label>
+      <input type="password" id="inputConfirmPwd" class="field-input" placeholder="••••••••">
+    </div>
+    <button class="btn-save" onclick="updatePassword()">Mettre à jour</button>
+  </div>
+
+  <!-- ABONNEMENT -->
+  <div class="section">
+    <div class="section-title">Mon abonnement</div>
+    <div class="sub-card">
+      <div class="sub-info">
+        <h3 id="subPlanName">—</h3>
+        <p id="subRenewInfo">—</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span class="sub-badge" id="subStatus">—</span>
+        <button class="btn-manage" onclick="manageSubscription()">Gérer →</button>
+        <button class="btn-manage" onclick="goToPlans()">Changer de plan →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DÉCONNEXION -->
+  <div class="section">
+    <div class="section-title">Session</div>
+    <div class="danger-item">
+      <p>Déconnecter ton compte de cet appareil.</p>
+      <button class="btn-manage" onclick="logout()">Se déconnecter</button>
+    </div>
+  </div>
+
+  <!-- ZONE DANGER -->
+  <div class="danger-section">
+    <div class="danger-title">⚠ Zone dangereuse</div>
+    <div class="danger-item">
+      <p>Supprimer définitivement mon compte et toutes mes données.</p>
+      <button class="btn-danger" onclick="deleteAccount()">Supprimer mon compte</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">✓ Modifications enregistrées</div>
+
+<script>
+let userData = {};
+
+window.addEventListener('message', function(e) {
+  if (!e.data) return;
+  if (e.data.type === 'PREVANA_INIT_PROFIL') {
+    userData = e.data;
+    populatePage();
+  }
+});
+
+function populatePage() {
+  const prenom = userData.prenom || '';
+  const email  = userData.email  || '';
+  const plan   = userData.plan   || '—';
+  const renew  = userData.renewDate || '—';
+  const stats  = userData.stats  || {};
+
+  document.getElementById('inputPrenom').value  = prenom;
+  document.getElementById('inputEmail').value   = email;
+  document.getElementById('displayName').textContent  = prenom || 'Mon profil';
+  document.getElementById('displayEmail').textContent = email;
+  document.getElementById('displayPlan').textContent  = plan;
+  document.getElementById('avatarInitial').textContent = prenom ? prenom[0].toUpperCase() : '?';
+
+  const planLabels = { starter:'Plan Starter', pro:'Plan Pro', premium:'Plan Premium' };
+  document.getElementById('subPlanName').textContent  = planLabels[plan] || plan;
+  document.getElementById('subRenewInfo').textContent = `Renouvellement le ${renew}`;
+  document.getElementById('subStatus').textContent    = userData.subActif ? '✓ Actif' : 'Inactif';
+  document.getElementById('displayPlan').textContent  = planLabels[plan] || plan;
+
+  document.getElementById('statPrevs').textContent  = stats.total    || 0;
+  document.getElementById('statActifs').textContent = stats.actifs   || 0;
+  document.getElementById('statPdfs').textContent   = stats.pdfs     || 0;
+}
+
+function saveProfile() {
+  const prenom = document.getElementById('inputPrenom').value;
+  const email  = document.getElementById('inputEmail').value;
+  window.parent.postMessage({ type:'PREVANA_SAVE_PROFILE', prenom, email }, '*');
+  showToast('✓ Profil mis à jour');
+}
+
+function changePassword() {
+  const s = document.getElementById('passwordSection');
+  s.style.display = s.style.display === 'none' ? 'block' : 'none';
+}
+
+function updatePassword() {
+  const oldPwd     = document.getElementById('inputOldPwd').value;
+  const newPwd     = document.getElementById('inputNewPwd').value;
+  const confirmPwd = document.getElementById('inputConfirmPwd').value;
+  if (newPwd !== confirmPwd) { alert('Les mots de passe ne correspondent pas.'); return; }
+  if (newPwd.length < 8)     { alert('Le mot de passe doit faire au moins 8 caractères.'); return; }
+  window.parent.postMessage({ type:'PREVANA_UPDATE_PASSWORD', oldPwd, newPwd }, '*');
+  showToast('✓ Mot de passe mis à jour');
+  document.getElementById('passwordSection').style.display = 'none';
+}
+
+function manageSubscription() { window.parent.postMessage({ type:'PREVANA_MANAGE_SUB' }, '*'); }
+function goToPlans()          { window.parent.postMessage({ type:'PREVANA_NAVIGATE', page:'abonnement' }, '*'); }
+function logout()             { window.parent.postMessage({ type:'PREVANA_LOGOUT' }, '*'); }
+function goBack()             { window.parent.postMessage({ type:'PREVANA_NAVIGATE', page:'dashboard' }, '*'); }
+
+function deleteAccount() {
+  if (confirm('Es-tu sûr ? Cette action est irréversible — toutes tes données seront supprimées définitivement.')) {
+    window.parent.postMessage({ type:'PREVANA_DELETE_ACCOUNT' }, '*');
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+</body>
+</html>

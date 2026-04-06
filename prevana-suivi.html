@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prevana — Mon suivi</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --or: #C9A84C; --or-clair: #E8C97A; --blanc: #F0EDE8; --gris: #8A8AAA;
+    --noir: #0A0A0F; --anthracite: #141420; --carte: #1A1A2E; --bordure: #2A2A45;
+    --vert: #4CAF7D; --rouge: #E05A5A; --bleu: #5A8AE0; --orange: #E09A5A;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--noir); color:var(--blanc); font-family:'DM Sans',sans-serif; min-height:100vh; }
+
+  /* HEADER */
+  header { background:var(--anthracite); border-bottom:1px solid var(--bordure); padding:20px 40px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+  .logo { font-family:'Playfair Display',serif; font-weight:700; font-size:1.5rem; }
+  .logo span:first-child { color:var(--or); }
+  .logo span:last-child { color:var(--blanc); }
+  .header-right { display:flex; align-items:center; gap:16px; }
+  .projet-badge { background:rgba(201,168,76,0.1); border:1px solid rgba(201,168,76,0.25); border-radius:20px; padding:6px 14px; font-size:0.78rem; color:var(--or); font-weight:500; }
+
+  /* TABS */
+  .tabs { background:var(--anthracite); border-bottom:1px solid var(--bordure); padding:0 40px; display:flex; gap:4px; }
+  .tab { padding:14px 20px; font-size:0.85rem; font-weight:500; color:var(--gris); cursor:pointer; border-bottom:2px solid transparent; transition:color 0.2s, border-color 0.2s; background:none; border-top:none; border-left:none; border-right:none; font-family:'DM Sans',sans-serif; }
+  .tab:hover { color:var(--blanc); }
+  .tab.active { color:var(--or); border-bottom-color:var(--or); }
+
+  main { max-width:960px; margin:0 auto; padding:36px 40px 60px; }
+
+  /* SECTION */
+  .section { display:none; animation:fadeIn 0.3s ease; }
+  .section.active { display:block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+  /* CARDS */
+  .card { background:var(--carte); border:1px solid var(--bordure); border-radius:14px; padding:24px; margin-bottom:16px; }
+  .card-title { font-size:0.78rem; font-weight:600; color:var(--or); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:18px; }
+
+  /* MOIS SELECTOR */
+  .mois-selector { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:28px; }
+  .mois-btn { background:var(--anthracite); border:1px solid var(--bordure); border-radius:8px; padding:8px 14px; font-size:0.8rem; font-weight:500; color:var(--gris); cursor:pointer; transition:all 0.2s; font-family:'DM Sans',sans-serif; }
+  .mois-btn:hover { border-color:var(--or); color:var(--blanc); }
+  .mois-btn.active { background:rgba(201,168,76,0.12); border-color:var(--or); color:var(--or); }
+  .mois-btn.saisi { position:relative; }
+  .mois-btn.saisi::after { content:''; position:absolute; top:5px; right:5px; width:5px; height:5px; background:var(--vert); border-radius:50%; }
+
+  /* SAISIE */
+  .saisie-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+  .saisie-field { }
+  .saisie-label { font-size:0.82rem; font-weight:500; color:var(--blanc); margin-bottom:4px; display:block; }
+  .saisie-hint { font-size:0.73rem; color:var(--gris); margin-bottom:8px; line-height:1.4; }
+  .input-wrap { position:relative; }
+  .input-wrap input { width:100%; background:var(--anthracite); border:1px solid var(--bordure); border-radius:8px; padding:11px 46px 11px 14px; color:var(--blanc); font-family:'DM Mono',monospace; font-size:0.95rem; outline:none; transition:border-color 0.2s, box-shadow 0.2s; }
+  .input-wrap input:focus { border-color:var(--or); box-shadow:0 0 0 3px rgba(201,168,76,0.1); }
+  .input-wrap input::placeholder { color:var(--gris); opacity:0.4; font-family:'DM Sans',sans-serif; }
+  .input-suffix { position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:0.75rem; color:var(--gris); pointer-events:none; font-family:'DM Mono',monospace; }
+
+  .btn-save { background:linear-gradient(135deg,var(--or),var(--or-clair)); border:none; border-radius:50px; color:var(--noir); padding:12px 32px; font-family:'DM Sans',sans-serif; font-size:0.9rem; font-weight:600; cursor:pointer; transition:opacity 0.2s,transform 0.2s; margin-top:20px; }
+  .btn-save:hover { opacity:0.9; transform:translateY(-1px); }
+
+  .btn-import { background:transparent; border:1px dashed var(--bordure); border-radius:8px; color:var(--gris); padding:10px 20px; font-family:'DM Sans',sans-serif; font-size:0.82rem; font-weight:500; cursor:pointer; display:flex; align-items:center; gap:8px; transition:border-color 0.2s,color 0.2s; margin-bottom:20px; }
+  .btn-import:hover { border-color:var(--or); color:var(--or); }
+
+  .separator { height:1px; background:var(--bordure); margin:20px 0; }
+
+  /* JAUGES */
+  .jauge-block { margin-bottom:24px; }
+  .jauge-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+  .jauge-left { }
+  .jauge-emoji { font-size:1.2rem; margin-bottom:4px; }
+  .jauge-titre { font-size:1rem; font-weight:600; color:var(--blanc); margin-bottom:2px; }
+  .jauge-sous-titre { font-size:0.78rem; color:var(--gris); }
+  .jauge-right { text-align:right; }
+  .jauge-pct { font-family:'DM Mono',monospace; font-size:1.6rem; font-weight:500; line-height:1; }
+  .jauge-pct.vert { color:var(--vert); }
+  .jauge-pct.orange { color:var(--orange); }
+  .jauge-pct.rouge { color:var(--rouge); }
+  .jauge-pct.bleu { color:var(--bleu); }
+  .jauge-detail { font-size:0.75rem; color:var(--gris); margin-top:3px; }
+
+  .jauge-bar-bg { height:10px; background:var(--bordure); border-radius:5px; overflow:hidden; margin-bottom:8px; }
+  .jauge-bar-fill { height:100%; border-radius:5px; transition:width 1s cubic-bezier(0.4,0,0.2,1); min-width:4px; }
+  .jauge-bar-fill.vert { background:linear-gradient(90deg,#3a9e6a,var(--vert)); }
+  .jauge-bar-fill.orange { background:linear-gradient(90deg,#c07a3a,var(--orange)); }
+  .jauge-bar-fill.rouge { background:linear-gradient(90deg,#c04040,var(--rouge)); }
+  .jauge-bar-fill.bleu { background:linear-gradient(90deg,#3a6ab8,var(--bleu)); }
+
+  .jauge-message { font-size:0.8rem; padding:10px 14px; border-radius:8px; line-height:1.5; }
+  .jauge-message.vert { background:rgba(76,175,125,0.08); color:var(--vert); border:1px solid rgba(76,175,125,0.2); }
+  .jauge-message.orange { background:rgba(224,154,90,0.08); color:var(--orange); border:1px solid rgba(224,154,90,0.2); }
+  .jauge-message.rouge { background:rgba(224,90,90,0.08); color:var(--rouge); border:1px solid rgba(224,90,90,0.2); }
+  .jauge-message.bleu { background:rgba(90,138,224,0.08); color:var(--bleu); border:1px solid rgba(90,138,224,0.2); }
+
+  /* STATS RAPIDES */
+  .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:24px; }
+  .stat-mini { background:var(--carte); border:1px solid var(--bordure); border-radius:12px; padding:18px 20px; }
+  .stat-mini-label { font-size:0.72rem; color:var(--gris); font-weight:500; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.05em; }
+  .stat-mini-val { font-family:'DM Mono',monospace; font-size:1.4rem; font-weight:500; color:var(--blanc); margin-bottom:4px; }
+  .stat-mini-sub { font-size:0.72rem; color:var(--gris); }
+  .stat-mini-badge { display:inline-flex; align-items:center; gap:4px; font-size:0.7rem; font-weight:600; padding:3px 8px; border-radius:6px; margin-top:6px; }
+  .badge-vert { background:rgba(76,175,125,0.1); color:var(--vert); }
+  .badge-rouge { background:rgba(224,90,90,0.1); color:var(--rouge); }
+  .badge-orange { background:rgba(224,154,90,0.1); color:var(--orange); }
+
+  /* TABLEAU MENSUEL */
+  .table-wrap { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; }
+  thead th { background:var(--anthracite); color:var(--or); font-weight:600; padding:10px 14px; text-align:left; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; border-bottom:1px solid var(--bordure); }
+  tbody td { padding:10px 14px; border-bottom:1px solid rgba(42,42,69,0.5); color:var(--blanc); font-family:'DM Mono',monospace; font-size:0.82rem; }
+  tbody tr:last-child td { border-bottom:none; }
+  tbody tr:hover td { background:rgba(255,255,255,0.02); }
+  .td-label { font-family:'DM Sans',sans-serif; color:var(--gris); font-size:0.8rem; }
+  .td-pos { color:var(--vert); }
+  .td-neg { color:var(--rouge); }
+  .td-warn { color:var(--orange); }
+  .td-empty { color:var(--bordure); font-style:italic; font-family:'DM Sans',sans-serif; }
+
+  /* UPSELL */
+  .upsell-card { background:rgba(201,168,76,0.05); border:1px solid rgba(201,168,76,0.2); border-radius:14px; padding:22px 24px; display:flex; align-items:center; justify-content:space-between; gap:24px; margin-top:24px; }
+  .upsell-text p { font-size:0.9rem; font-weight:600; color:var(--or); margin-bottom:4px; }
+  .upsell-text span { font-size:0.8rem; color:var(--gris); line-height:1.5; }
+  .btn-upsell { background:linear-gradient(135deg,var(--or),var(--or-clair)); border:none; border-radius:50px; color:var(--noir); padding:10px 22px; font-family:'DM Sans',sans-serif; font-size:0.82rem; font-weight:600; cursor:pointer; white-space:nowrap; }
+
+  /* VIDE */
+  .empty-state { text-align:center; padding:50px 20px; }
+  .empty-icon { font-size:2.5rem; margin-bottom:14px; opacity:0.3; }
+  .empty-title { font-size:1rem; color:var(--blanc); margin-bottom:8px; font-weight:600; }
+  .empty-sub { font-size:0.82rem; color:var(--gris); line-height:1.6; }
+
+  /* DETAIL ROWS */
+  .detail-list { display:flex; flex-direction:column; gap:12px; }
+
+  .detail-row { padding:14px 16px; background:var(--anthracite); border-radius:10px; border:1px solid var(--bordure); transition:border-color 0.2s; }
+  .detail-row:hover { border-color:rgba(201,168,76,0.2); }
+
+  .detail-row-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:12px; }
+  .detail-nom { font-size:0.88rem; font-weight:500; color:var(--blanc); }
+  .detail-right { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+  .detail-reel { font-family:'DM Mono',monospace; font-size:0.9rem; font-weight:600; color:var(--blanc); }
+
+  .detail-ecart { font-size:0.75rem; font-weight:600; padding:3px 8px; border-radius:6px; font-family:'DM Mono',monospace; }
+  .detail-ecart.vert  { background:rgba(76,175,125,0.12);  color:var(--vert); }
+  .detail-ecart.rouge { background:rgba(224,90,90,0.12);   color:var(--rouge); }
+  .detail-ecart.orange{ background:rgba(224,154,90,0.12);  color:var(--orange); }
+  .detail-ecart.gris  { background:rgba(138,138,170,0.12); color:var(--gris); }
+
+  .detail-bar-bg { height:5px; background:var(--bordure); border-radius:3px; overflow:hidden; margin-bottom:7px; }
+  .detail-bar-fill { height:100%; border-radius:3px; max-width:100%; }
+  .detail-bar-fill.vert   { background:linear-gradient(90deg,#3a9e6a,var(--vert)); }
+  .detail-bar-fill.orange { background:linear-gradient(90deg,#c07a3a,var(--orange)); }
+  .detail-bar-fill.rouge  { background:linear-gradient(90deg,#c04040,var(--rouge)); }
+
+  .detail-meta { font-size:0.73rem; color:var(--gris); }
+  .vert-txt   { color:var(--vert); font-weight:500; }
+  .rouge-txt  { color:var(--rouge); font-weight:500; }
+  .orange-txt { color:var(--orange); font-weight:500; }
+
+  .detail-total-row {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 16px; background:var(--carte);
+    border-radius:10px; border:1px solid var(--bordure);
+    border-top:2px solid var(--or); margin-top:4px;
+    font-size:0.85rem; font-weight:600; color:var(--gris);
+    gap:10px; flex-wrap:wrap;
+  }
+
+  /* TOAST */
+  .toast { position:fixed; bottom:28px; right:28px; background:var(--carte); border:1px solid var(--vert); border-radius:10px; padding:12px 18px; font-size:0.82rem; color:var(--vert); display:flex; align-items:center; gap:8px; z-index:999; transform:translateY(60px); opacity:0; transition:all 0.3s ease; }
+  .toast.show { transform:translateY(0); opacity:1; }
+
+  /* IMPORT ZONE */
+  .import-zone { border:1px dashed var(--bordure); border-radius:10px; padding:28px; text-align:center; cursor:pointer; transition:border-color 0.2s,background 0.2s; margin-bottom:16px; }
+  .import-zone:hover { border-color:var(--or); background:rgba(201,168,76,0.03); }
+  .import-zone-icon { font-size:1.8rem; margin-bottom:10px; opacity:0.5; }
+  .import-zone-label { font-size:0.85rem; color:var(--gris); margin-bottom:4px; }
+  .import-zone-sub { font-size:0.72rem; color:var(--gris); opacity:0.6; }
+  input[type="file"] { display:none; }
+
+  @media(max-width:680px) {
+    main { padding:24px 20px; }
+    header { padding:16px 20px; }
+    .tabs { padding:0 20px; }
+    .saisie-grid { grid-template-columns:1fr; }
+    .stats-row { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span>prev</span><span>ana</span></div>
+  <div class="header-right">
+    <div class="projet-badge">📊 Mon Shop en ligne</div>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('tableau-bord', this)">Vue d'ensemble</button>
+  <button class="tab" onclick="showTab('saisie', this)">Mettre à jour mes chiffres</button>
+  <button class="tab" onclick="showTab('historique', this)">Historique mois par mois</button>
+</div>
+
+<main>
+
+  <!-- ── VUE D'ENSEMBLE ── -->
+  <section class="section active" id="tab-tableau-bord">
+
+    <div class="stats-row">
+      <div class="stat-mini">
+        <div class="stat-mini-label">Ce que tu as encaissé</div>
+        <div class="stat-mini-val">8 420 €</div>
+        <div class="stat-mini-sub">sur 12 000 € prévu cette année</div>
+        <div class="stat-mini-badge badge-orange">▲ 70% de l'objectif</div>
+      </div>
+      <div class="stat-mini">
+        <div class="stat-mini-label">Ce que tu as dépensé</div>
+        <div class="stat-mini-val">4 190 €</div>
+        <div class="stat-mini-sub">sur 5 400 € prévu cette année</div>
+        <div class="stat-mini-badge badge-vert">✓ Sous contrôle</div>
+      </div>
+      <div class="stat-mini">
+        <div class="stat-mini-label">Ce que tu as vraiment gagné</div>
+        <div class="stat-mini-val">4 230 €</div>
+        <div class="stat-mini-sub">sur 6 600 € prévu cette année</div>
+        <div class="stat-mini-badge badge-orange">▲ 64% de l'objectif</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Où tu en es — 7 mois sur 12</div>
+
+      <!-- JAUGE CA -->
+      <div class="jauge-block">
+        <div class="jauge-header">
+          <div class="jauge-left">
+            <div class="jauge-emoji">💰</div>
+            <div class="jauge-titre">Ce que tu as encaissé</div>
+            <div class="jauge-sous-titre">8 420 € réels · 8 400 € prévu à ce stade</div>
+          </div>
+          <div class="jauge-right">
+            <div class="jauge-pct vert">100%</div>
+            <div class="jauge-detail">de l'objectif en cours</div>
+          </div>
+        </div>
+        <div class="jauge-bar-bg">
+          <div class="jauge-bar-fill vert" style="width:100%"></div>
+        </div>
+        <div class="jauge-message vert">🎉 Tu es pile dans les clous. Continue comme ça — tu es exactement là où tu devais être à ce stade de l'année.</div>
+      </div>
+
+      <div class="separator"></div>
+
+      <!-- JAUGE DEPENSES -->
+      <div class="jauge-block">
+        <div class="jauge-header">
+          <div class="jauge-left">
+            <div class="jauge-emoji">💸</div>
+            <div class="jauge-titre">Ce que tu as dépensé</div>
+            <div class="jauge-sous-titre">4 190 € réels · 3 150 € prévu à ce stade</div>
+          </div>
+          <div class="jauge-right">
+            <div class="jauge-pct rouge">133%</div>
+            <div class="jauge-detail">du budget dépenses</div>
+          </div>
+        </div>
+        <div class="jauge-bar-bg">
+          <div class="jauge-bar-fill rouge" style="width:100%"></div>
+        </div>
+        <div class="jauge-message rouge">⚠️ Tu as dépensé 1 040 € de plus que prévu à ce stade. Pas de panique, mais garde un œil sur tes dépenses les prochains mois pour rattraper l'écart.</div>
+      </div>
+
+      <div class="separator"></div>
+
+      <!-- JAUGE RESULTAT -->
+      <div class="jauge-block">
+        <div class="jauge-header">
+          <div class="jauge-left">
+            <div class="jauge-emoji">🏆</div>
+            <div class="jauge-titre">Ce que tu as vraiment gagné</div>
+            <div class="jauge-sous-titre">4 230 € réels · 5 250 € prévu à ce stade</div>
+          </div>
+          <div class="jauge-right">
+            <div class="jauge-pct orange">81%</div>
+            <div class="jauge-detail">de l'objectif en cours</div>
+          </div>
+        </div>
+        <div class="jauge-bar-bg">
+          <div class="jauge-bar-fill orange" style="width:81%"></div>
+        </div>
+        <div class="jauge-message orange">📉 Tu as gagné 1 020 € de moins que prévu. C'est principalement dû à tes dépenses plus élevées. Si tu maîtrises tes charges sur les 5 prochains mois, tu peux encore redresser la barre.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Projection de fin d'année</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px;">
+        <div style="background:var(--anthracite); border-radius:10px; padding:16px; text-align:center;">
+          <div style="font-size:0.72rem; color:var(--gris); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.05em;">Encaissements</div>
+          <div style="font-family:'DM Mono',monospace; font-size:1.2rem; color:var(--vert); margin-bottom:4px;">~14 400 €</div>
+          <div style="font-size:0.7rem; color:var(--gris);">Objectif : 12 000 €</div>
+          <div style="font-size:0.7rem; color:var(--vert); margin-top:4px;">+2 400 € au-dessus 🎉</div>
+        </div>
+        <div style="background:var(--anthracite); border-radius:10px; padding:16px; text-align:center;">
+          <div style="font-size:0.72rem; color:var(--gris); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.05em;">Dépenses</div>
+          <div style="font-family:'DM Mono',monospace; font-size:1.2rem; color:var(--rouge); margin-bottom:4px;">~7 180 €</div>
+          <div style="font-size:0.7rem; color:var(--gris);">Objectif : 5 400 €</div>
+          <div style="font-size:0.7rem; color:var(--rouge); margin-top:4px;">+1 780 € au-dessus ⚠️</div>
+        </div>
+        <div style="background:var(--anthracite); border-radius:10px; padding:16px; text-align:center;">
+          <div style="font-size:0.72rem; color:var(--gris); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.05em;">Gain net</div>
+          <div style="font-family:'DM Mono',monospace; font-size:1.2rem; color:var(--orange); margin-bottom:4px;">~7 220 €</div>
+          <div style="font-size:0.7rem; color:var(--gris);">Objectif : 6 600 €</div>
+          <div style="font-size:0.7rem; color:var(--orange); margin-top:4px;">+620 € malgré tout ✓</div>
+        </div>
+      </div>
+      <div style="font-size:0.75rem; color:var(--gris); margin-top:14px; font-style:italic;">Projection basée sur ta moyenne des 7 derniers mois. Elle se met à jour automatiquement chaque fois que tu entres tes chiffres.</div>
+    </div>
+
+    <!-- DÉTAIL VENTES -->
+    <div class="card">
+      <div class="card-title">Ce que tu as vendu — produit par produit</div>
+      <div style="font-size:0.78rem; color:var(--gris); margin-bottom:16px;">Chaque source de revenus comparée à ce qui était prévu. En vert = tu as dépassé l'objectif. En rouge = tu es en dessous.</div>
+
+      <div class="detail-list" id="detailVentes">
+
+        <div class="detail-row">
+          <div class="detail-row-top">
+            <div class="detail-nom">🎓 Formation en ligne — Dropshipping</div>
+            <div class="detail-right">
+              <span class="detail-reel">2 953 €</span>
+              <span class="detail-ecart vert">+382 €</span>
+            </div>
+          </div>
+          <div class="detail-bar-bg"><div class="detail-bar-fill vert" style="width:115%"></div></div>
+          <div class="detail-meta">Prévu : 2 571 € · <span class="vert-txt">115% de l'objectif</span></div>
+        </div>
+
+        <div class="detail-row">
+          <div class="detail-row-top">
+            <div class="detail-nom">🎯 Coaching individuel (séance 1h)</div>
+            <div class="detail-right">
+              <span class="detail-reel">2 400 €</span>
+              <span class="detail-ecart vert">+560 €</span>
+            </div>
+          </div>
+          <div class="detail-bar-bg"><div class="detail-bar-fill vert" style="width:100%"></div></div>
+          <div class="detail-meta">Prévu : 1 840 € · <span class="vert-txt">130% de l'objectif</span></div>
+        </div>
+
+        <div class="detail-row">
+          <div class="detail-row-top">
+            <div class="detail-nom">👕 Produits physiques (T-shirts)</div>
+            <div class="detail-right">
+              <span class="detail-reel">1 325 €</span>
+              <span class="detail-ecart rouge">-75 €</span>
+            </div>
+          </div>
+          <div class="detail-bar-bg"><div class="detail-bar-fill orange" style="width:94%"></div></div>
+          <div class="detail-meta">Prévu : 1 400 € · <span class="orange-txt">94% de l'objectif</span></div>
+        </div>
+
+        <div class="detail-row">
+          <div class="detail-row-top">
+            <div class="detail-nom">🔗 Affiliation & commissions</div>
+            <div class="detail-right">
+              <span class="detail-reel">1 346 €</span>
+              <span class="detail-ecart gris">non prévu</span>
+            </div>
+          </div>
+          <div class="detail-bar-bg"><div class="detail-bar-fill vert" style="width:100%"></div></div>
+          <div class="detail-meta"><span class="vert-txt">Bonus non prévu — excellente surprise ✓</span></div>
+        </div>
+
+        <div class="detail-total-row">
+          <span>Total encaissé</span>
+          <span style="font-family:'DM Mono',monospace; color:var(--or); font-weight:600;">8 024 €</span>
+          <span style="font-size:0.75rem; color:var(--gris);">Prévu : 7 411 €</span>
+          <span class="detail-ecart vert">+613 €</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DÉTAIL DÉPENSES -->
+    <div class="card">
+      <div class="card-title">Ce que tu as dépensé — poste par poste</div>
+      <div style="font-size:0.78rem; color:var(--gris); margin-bottom:16px;">Chaque poste de dépense comparé à ton budget. En rouge = tu as dépassé le budget. En vert = tu es resté en dessous.</div>
+
+      <div class="detail-list" id="detailCharges">
+
+        <div class="detail-row">
+          <div class="detail-row-top">
+            <div class="detail-nom">📣 Publicité & marketing</div>
+            <div class="detail-right">
+              <span class="detail-reel">1 570 €</span>
+              <span class="detail-ecart rouge">+520 €</span>
+            </div>
+          </div>
+          <div class="detail-bar-bg"><div class="detail-bar-fill rouge" style="width:100%"></div></div>
+          <div class="detail-meta">Budget : 1 050 € · <span class="rouge-txt">150% du budget ⚠️</span></div>
+        </div>
+
+        <div class="detail-row">
+          <div class="detail-row-top">
+            <div class="detail-nom">💻 Logiciels & abonnements</div>
+            <div class="detail-right">
+              <span class="detail-reel">730 €</span>
+              <span class="detail-ecart rouge">+170 €</span>
+            </div>
+          </div>
+          <div class="detail-bar-bg"><div class="detail-bar-fill orange" style="width:100%"></div></div>
+          <div class="detail-meta">Budget : 560 € · <span class="orange-txt">130% du budget</span></div>
+        </div>
+
+        <div class="detail-row">
+          <div class="detail-row-top">
+            <div class="detail-nom">📱 Téléphone & internet</div>
+            <div class="detail-right">
+              <span class="detail-reel">280 €</span>
+              <span class="detail-ecart vert">0 €</span>
+            </div>
+          </div>
+          <div class="detail-bar-bg"><div class="detail-bar-fill vert" style="width:100%"></div></div>
+          <div class="detail-meta">Budget : 280 € · <span class="vert-txt">Pile dans le budget ✓</span></div>
+        </div>
+
+        <div class="detail-row">
+          <div class="detail-row-top">
+            <div class="detail-nom">🔒 Assurance professionnelle</div>
+            <div class="detail-right">
+              <span class="detail-reel">210 €</span>
+              <span class="detail-ecart vert">0 €</span>
+            </div>
+          </div>
+          <div class="detail-bar-bg"><div class="detail-bar-fill vert" style="width:100%"></div></div>
+          <div class="detail-meta">Budget : 210 € · <span class="vert-txt">Pile dans le budget ✓</span></div>
+        </div>
+
+        <div class="detail-row">
+          <div class="detail-row-top">
+            <div class="detail-nom">🧾 Honoraires comptable</div>
+            <div class="detail-right">
+              <span class="detail-reel">560 €</span>
+              <span class="detail-ecart vert">0 €</span>
+            </div>
+          </div>
+          <div class="detail-bar-bg"><div class="detail-bar-fill vert" style="width:100%"></div></div>
+          <div class="detail-meta">Budget : 560 € · <span class="vert-txt">Pile dans le budget ✓</span></div>
+        </div>
+
+        <div class="detail-row">
+          <div class="detail-row-top">
+            <div class="detail-nom">🏦 Frais bancaires</div>
+            <div class="detail-right">
+              <span class="detail-reel">230 €</span>
+              <span class="detail-ecart rouge">+90 €</span>
+            </div>
+          </div>
+          <div class="detail-bar-bg"><div class="detail-bar-fill rouge" style="width:100%"></div></div>
+          <div class="detail-meta">Budget : 140 € · <span class="rouge-txt">164% du budget ⚠️</span></div>
+        </div>
+
+        <div class="detail-row">
+          <div class="detail-row-top">
+            <div class="detail-nom">📦 Fournitures & petits matériels</div>
+            <div class="detail-right">
+              <span class="detail-reel">610 €</span>
+              <span class="detail-ecart rouge">+400 €</span>
+            </div>
+          </div>
+          <div class="detail-bar-bg"><div class="detail-bar-fill rouge" style="width:100%"></div></div>
+          <div class="detail-meta">Budget : 210 € · <span class="rouge-txt">290% du budget 🚨</span></div>
+        </div>
+
+        <div class="detail-total-row">
+          <span>Total dépensé</span>
+          <span style="font-family:'DM Mono',monospace; color:var(--rouge); font-weight:600;">4 190 €</span>
+          <span style="font-size:0.75rem; color:var(--gris);">Budget : 3 010 €</span>
+          <span class="detail-ecart rouge">+1 180 €</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="upsell-card">
+      <div class="upsell-text">
+        <p>Tes dépenses dérapent — on peut t'aider à corriger le tir</p>
+        <span>Un audit expert de ton prévisionnel peut identifier où réduire les coûts et comment optimiser ton résultat d'ici la fin d'année.</span>
+      </div>
+      <button class="btn-upsell">Demander un audit →</button>
+    </div>
+
+  </section>
+
+  <!-- ── SAISIE ── -->
+  <section class="section" id="tab-saisie">
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title">Pour quel mois tu saisis tes chiffres ?</div>
+      <div class="mois-selector" id="moisSelector">
+        <button class="mois-btn saisi" onclick="selectMois(this, 'jan')">Jan</button>
+        <button class="mois-btn saisi" onclick="selectMois(this, 'fev')">Fév</button>
+        <button class="mois-btn saisi" onclick="selectMois(this, 'mar')">Mar</button>
+        <button class="mois-btn saisi" onclick="selectMois(this, 'avr')">Avr</button>
+        <button class="mois-btn saisi" onclick="selectMois(this, 'mai')">Mai</button>
+        <button class="mois-btn saisi" onclick="selectMois(this, 'jun')">Juin</button>
+        <button class="mois-btn saisi" onclick="selectMois(this, 'jul')">Juil</button>
+        <button class="mois-btn active" onclick="selectMois(this, 'aou')">Août</button>
+        <button class="mois-btn" onclick="selectMois(this, 'sep')">Sep</button>
+        <button class="mois-btn" onclick="selectMois(this, 'oct')">Oct</button>
+        <button class="mois-btn" onclick="selectMois(this, 'nov')">Nov</button>
+        <button class="mois-btn" onclick="selectMois(this, 'dec')">Déc</button>
+      </div>
+      <div style="font-size:0.75rem; color:var(--gris);">
+        <span style="display:inline-flex; align-items:center; gap:5px; margin-right:14px;"><span style="width:6px; height:6px; background:var(--vert); border-radius:50%; display:inline-block;"></span> Mois déjà saisi</span>
+        <span style="display:inline-flex; align-items:center; gap:5px;">Mois non saisi</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Tes chiffres pour <span id="moisActif">Août 2026</span></div>
+
+      <div style="margin-bottom:20px;">
+        <label class="saisie-label" style="margin-bottom:6px;">Tu préfères importer depuis un fichier ?</label>
+        <label class="btn-import" for="fileInput">
+          <span>📎</span> Importer un fichier Excel ou CSV
+        </label>
+        <input type="file" id="fileInput" accept=".xlsx,.csv,.xls" onchange="handleFileImport(this)">
+        <div style="font-size:0.72rem; color:var(--gris);">Le fichier doit contenir 3 colonnes : "Encaissements", "Dépenses", "Gain net" — ou tu peux le saisir à la main ci-dessous.</div>
+      </div>
+
+      <div class="separator"></div>
+
+      <div class="saisie-grid">
+        <div class="saisie-field">
+          <label class="saisie-label">💰 Ce que tu as encaissé</label>
+          <div class="saisie-hint">Tout l'argent que tu as reçu ce mois-ci — ventes, factures payées, commissions…</div>
+          <div class="input-wrap">
+            <input type="number" id="reel-ca" placeholder="0" min="0">
+            <span class="input-suffix">€</span>
+          </div>
+          <div style="margin-top:8px; font-size:0.73rem; color:var(--gris);">Prévu ce mois : <span style="color:var(--or); font-family:'DM Mono',monospace;">1 000 €</span></div>
+        </div>
+
+        <div class="saisie-field">
+          <label class="saisie-label">💸 Ce que tu as dépensé</label>
+          <div class="saisie-hint">Toutes tes sorties d'argent ce mois-ci — fournisseurs, abonnements, publicité…</div>
+          <div class="input-wrap">
+            <input type="number" id="reel-charges" placeholder="0" min="0">
+            <span class="input-suffix">€</span>
+          </div>
+          <div style="margin-top:8px; font-size:0.73rem; color:var(--gris);">Prévu ce mois : <span style="color:var(--or); font-family:'DM Mono',monospace;">450 €</span></div>
+        </div>
+
+        <div class="saisie-field">
+          <label class="saisie-label">🏆 Ce que tu as vraiment gagné</label>
+          <div class="saisie-hint">Ce qui reste dans ta poche après avoir tout payé. Encaissements moins dépenses.</div>
+          <div class="input-wrap">
+            <input type="number" id="reel-resultat" placeholder="Calculé auto" readonly style="opacity:0.6; cursor:not-allowed;">
+            <span class="input-suffix">€</span>
+          </div>
+          <div style="margin-top:8px; font-size:0.73rem; color:var(--gris);">Prévu ce mois : <span style="color:var(--or); font-family:'DM Mono',monospace;">550 €</span></div>
+        </div>
+      </div>
+
+      <div id="apercu-jauge" style="margin-top:24px; display:none;">
+        <div class="separator"></div>
+        <div style="font-size:0.78rem; font-weight:600; color:var(--or); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:14px;">Aperçu avant validation</div>
+        <div id="mini-jauges"></div>
+      </div>
+
+      <button class="btn-save" onclick="saveMois()">✓ Enregistrer ce mois</button>
+    </div>
+
+    <div class="card" style="background:rgba(90,138,224,0.05); border-color:rgba(90,138,224,0.2);">
+      <div class="card-title" style="color:var(--bleu);">Pas sûr de tes chiffres ?</div>
+      <p style="font-size:0.82rem; color:var(--gris); line-height:1.6;">C'est normal — l'important c'est d'entrer une estimation honnête. Tu pourras toujours corriger le mois suivant. Prevana calcule des <strong style="color:var(--blanc);">tendances</strong>, pas des bilans comptables officiels.</p>
+    </div>
+
+  </section>
+
+  <!-- ── HISTORIQUE ── -->
+  <section class="section" id="tab-historique">
+
+    <div class="card">
+      <div class="card-title">Mois par mois — 2026</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Mois</th>
+              <th>Encaissé</th>
+              <th>Prévu CA</th>
+              <th>Écart CA</th>
+              <th>Dépensé</th>
+              <th>Prévu charges</th>
+              <th>Gagné net</th>
+              <th>Résultat prévu</th>
+            </tr>
+          </thead>
+          <tbody id="historiqueBody">
+            <tr>
+              <td class="td-label">Janvier</td>
+              <td>1 180 €</td><td>1 000 €</td>
+              <td class="td-pos">+180 €</td>
+              <td>520 €</td><td>450 €</td>
+              <td class="td-pos">660 €</td><td>550 €</td>
+            </tr>
+            <tr>
+              <td class="td-label">Février</td>
+              <td>900 €</td><td>1 000 €</td>
+              <td class="td-neg">-100 €</td>
+              <td>480 €</td><td>450 €</td>
+              <td class="td-warn">420 €</td><td>550 €</td>
+            </tr>
+            <tr>
+              <td class="td-label">Mars</td>
+              <td>1 350 €</td><td>1 000 €</td>
+              <td class="td-pos">+350 €</td>
+              <td>610 €</td><td>450 €</td>
+              <td class="td-pos">740 €</td><td>550 €</td>
+            </tr>
+            <tr>
+              <td class="td-label">Avril</td>
+              <td>1 100 €</td><td>1 000 €</td>
+              <td class="td-pos">+100 €</td>
+              <td>490 €</td><td>450 €</td>
+              <td class="td-pos">610 €</td><td>550 €</td>
+            </tr>
+            <tr>
+              <td class="td-label">Mai</td>
+              <td>1 240 €</td><td>1 000 €</td>
+              <td class="td-pos">+240 €</td>
+              <td>700 €</td><td>450 €</td>
+              <td class="td-warn">540 €</td><td>550 €</td>
+            </tr>
+            <tr>
+              <td class="td-label">Juin</td>
+              <td>1 450 €</td><td>1 000 €</td>
+              <td class="td-pos">+450 €</td>
+              <td>800 €</td><td>450 €</td>
+              <td class="td-pos">650 €</td><td>550 €</td>
+            </tr>
+            <tr>
+              <td class="td-label">Juillet</td>
+              <td>1 200 €</td><td>1 000 €</td>
+              <td class="td-pos">+200 €</td>
+              <td>590 €</td><td>450 €</td>
+              <td class="td-pos">610 €</td><td>550 €</td>
+            </tr>
+            <tr>
+              <td class="td-label" style="color:var(--or);">Août <span style="font-size:0.68rem; background:rgba(201,168,76,0.15); padding:2px 6px; border-radius:4px; margin-left:4px;">En cours</span></td>
+              <td class="td-empty" colspan="7">Non saisi</td>
+            </tr>
+            <tr>
+              <td class="td-label">Septembre</td>
+              <td class="td-empty" colspan="7">Non saisi</td>
+            </tr>
+            <tr>
+              <td class="td-label">Octobre</td>
+              <td class="td-empty" colspan="7">Non saisi</td>
+            </tr>
+            <tr>
+              <td class="td-label">Novembre</td>
+              <td class="td-empty" colspan="7">Non saisi</td>
+            </tr>
+            <tr>
+              <td class="td-label">Décembre</td>
+              <td class="td-empty" colspan="7">Non saisi</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Ce que tu retiens de ces 7 mois</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div style="background:var(--anthracite); border-radius:10px; padding:16px;">
+          <div style="font-size:0.75rem; color:var(--gris); margin-bottom:6px;">Ton meilleur mois</div>
+          <div style="font-size:0.95rem; font-weight:600; color:var(--blanc); margin-bottom:2px;">Juin 2026</div>
+          <div style="font-family:'DM Mono',monospace; font-size:1rem; color:var(--vert);">1 450 € encaissés</div>
+        </div>
+        <div style="background:var(--anthracite); border-radius:10px; padding:16px;">
+          <div style="font-size:0.75rem; color:var(--gris); margin-bottom:6px;">Ton mois le plus compliqué</div>
+          <div style="font-size:0.95rem; font-weight:600; color:var(--blanc); margin-bottom:2px;">Février 2026</div>
+          <div style="font-family:'DM Mono',monospace; font-size:1rem; color:var(--rouge);">900 € encaissés</div>
+        </div>
+        <div style="background:var(--anthracite); border-radius:10px; padding:16px;">
+          <div style="font-size:0.75rem; color:var(--gris); margin-bottom:6px;">Moyenne mensuelle réelle</div>
+          <div style="font-family:'DM Mono',monospace; font-size:1.1rem; color:var(--blanc);">1 203 €</div>
+          <div style="font-size:0.72rem; color:var(--gris); margin-top:4px;">vs 1 000 € prévu</div>
+        </div>
+        <div style="background:var(--anthracite); border-radius:10px; padding:16px;">
+          <div style="font-size:0.75rem; color:var(--gris); margin-bottom:6px;">Gain moyen par mois</div>
+          <div style="font-family:'DM Mono',monospace; font-size:1.1rem; color:var(--orange);">604 €</div>
+          <div style="font-size:0.72rem; color:var(--gris); margin-top:4px;">vs 550 € prévu</div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<div class="toast" id="toast">✓ <span id="toastMsg"></span></div>
+
+<script>
+  function showTab(id, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    btn.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function selectMois(btn, mois) {
+    document.querySelectorAll('.mois-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const noms = { jan:'Janvier', fev:'Février', mar:'Mars', avr:'Avril', mai:'Mai', jun:'Juin', jul:'Juillet', aou:'Août', sep:'Septembre', oct:'Octobre', nov:'Novembre', dec:'Décembre' };
+    document.getElementById('moisActif').textContent = (noms[mois] || mois) + ' 2026';
+    // Reset fields
+    document.getElementById('reel-ca').value = '';
+    document.getElementById('reel-charges').value = '';
+    document.getElementById('reel-resultat').value = '';
+    document.getElementById('apercu-jauge').style.display = 'none';
+  }
+
+  // Calcul auto résultat
+  ['reel-ca','reel-charges'].forEach(id => {
+    document.getElementById(id).addEventListener('input', () => {
+      const ca = parseFloat(document.getElementById('reel-ca').value) || 0;
+      const charges = parseFloat(document.getElementById('reel-charges').value) || 0;
+      const resultat = ca - charges;
+      document.getElementById('reel-resultat').value = resultat !== 0 ? resultat : '';
+      if (ca > 0 || charges > 0) showApercu(ca, charges, resultat);
+      else document.getElementById('apercu-jauge').style.display = 'none';
+    });
+  });
+
+  function showApercu(ca, charges, resultat) {
+    const prevCA = 1000, prevCharges = 450, prevResultat = 550;
+    const pctCA = Math.min(Math.round((ca / prevCA) * 100), 150);
+    const pctCharges = Math.round((charges / prevCharges) * 100);
+    const colorCA = pctCA >= 100 ? 'vert' : pctCA >= 75 ? 'orange' : 'rouge';
+    const colorCharges = pctCharges <= 100 ? 'vert' : pctCharges <= 120 ? 'orange' : 'rouge';
+    const colorRes = resultat >= prevResultat ? 'vert' : resultat >= prevResultat * 0.75 ? 'orange' : 'rouge';
+
+    document.getElementById('mini-jauges').innerHTML = `
+      <div style="margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span style="font-size:0.8rem;color:var(--gris);">💰 Encaissé vs prévu</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.85rem;color:var(--${colorCA});">${pctCA}%</span>
+        </div>
+        <div class="jauge-bar-bg"><div class="jauge-bar-fill ${colorCA}" style="width:${Math.min(pctCA,100)}%"></div></div>
+      </div>
+      <div style="margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span style="font-size:0.8rem;color:var(--gris);">💸 Dépensé vs budget</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.85rem;color:var(--${colorCharges});">${pctCharges}%</span>
+        </div>
+        <div class="jauge-bar-bg"><div class="jauge-bar-fill ${colorCharges}" style="width:${Math.min(pctCharges,100)}%"></div></div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span style="font-size:0.8rem;color:var(--gris);">🏆 Gain net vs objectif</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.85rem;color:var(--${colorRes});">${prevResultat > 0 ? Math.round((resultat/prevResultat)*100) : 0}%</span>
+        </div>
+        <div class="jauge-bar-bg"><div class="jauge-bar-fill ${colorRes}" style="width:${Math.min(Math.max(Math.round((resultat/prevResultat)*100),0),100)}%"></div></div>
+      </div>
+    `;
+    document.getElementById('apercu-jauge').style.display = 'block';
+  }
+
+  function saveMois() {
+    const ca = document.getElementById('reel-ca').value;
+    const charges = document.getElementById('reel-charges').value;
+    if (!ca && !charges) { showToast('Entre au moins un chiffre avant d\'enregistrer'); return; }
+    // Marquer le mois comme saisi
+    const activeBtn = document.querySelector('.mois-btn.active');
+    if (activeBtn) { activeBtn.classList.add('saisi'); }
+    showToast('Chiffres enregistrés ✓');
+    showTab('tableau-bord', document.querySelector('.tab'));
+  }
+
+  function handleFileImport(input) {
+    if (input.files.length > 0) {
+      showToast('Fichier importé — vérification en cours…');
+      setTimeout(() => {
+        document.getElementById('reel-ca').value = '1120';
+        document.getElementById('reel-charges').value = '480';
+        document.getElementById('reel-resultat').value = '640';
+        showApercu(1120, 480, 640);
+        showToast('Données importées depuis le fichier ✓');
+      }, 1000);
+    }
+  }
+
+  let toastTimer;
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
+  }
+</script>
+</body>
+</html>
